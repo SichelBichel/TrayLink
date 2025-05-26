@@ -40,7 +40,7 @@
             // 
             // button1
             // 
-            button1.Location = new Point(354, 55);
+            button1.Location = new Point(125, 46);
             button1.Name = "button1";
             button1.Size = new Size(94, 29);
             button1.TabIndex = 0;
@@ -48,14 +48,14 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += test;
             // 
-            // Form1
+            // TrayPopupForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(409, 563);
             Controls.Add(button1);
-            Name = "Form1";
-            Text = "Form1";
+            Name = "TrayPopupForm";
+            Text = "TrayLink";
             ResumeLayout(false);
         }
 

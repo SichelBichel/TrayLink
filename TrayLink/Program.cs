@@ -2,9 +2,6 @@ namespace TrayLink
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         static NotifyIcon trayIcon;
         static TrayPopupForm popupForm;
 
