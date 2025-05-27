@@ -40,7 +40,7 @@ namespace TrayLink
                 }
                 else if (config.ActionType.Equals("FILE", StringComparison.OrdinalIgnoreCase))
                 {
-                    Process.Start(config.PathOrUrl);
+                    Process.Start(new ProcessStartInfo(config.PathOrUrl) {UseShellExecute = true});
                 }
                 else if (config.ActionType.Equals("PATH", StringComparison.OrdinalIgnoreCase))
                 {

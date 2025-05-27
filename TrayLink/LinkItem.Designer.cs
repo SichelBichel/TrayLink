@@ -36,7 +36,7 @@
             // labelType
             // 
             labelType.AutoSize = true;
-            labelType.Location = new Point(28, 58);
+            labelType.Location = new Point(38, 58);
             labelType.Name = "labelType";
             labelType.Size = new Size(41, 20);
             labelType.TabIndex = 0;
@@ -70,7 +70,7 @@
             Controls.Add(labelName);
             Controls.Add(labelType);
             Name = "LinkItem";
-            Size = new Size(285, 105);
+            Size = new Size(270, 105);
             ResumeLayout(false);
             PerformLayout();
         }

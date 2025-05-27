@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Security.AccessControl;
+using System.Text;
 using System.Text.Json;
+using Tomlyn;
 
 namespace TrayLink
 {
@@ -16,6 +19,12 @@ namespace TrayLink
             this.ShowInTaskbar = false;
             this.TopMost = true;
             this.Deactivate += (s, e) => this.Hide();
+            actionPanel.AutoScroll = true;
+            actionPanel.HorizontalScroll.Enabled = false;
+            actionPanel.HorizontalScroll.Visible = false;
+            actionPanel.VerticalScroll.Enabled = true;
+            actionPanel.VerticalScroll.Visible = true;
+            actionPanel.AutoScrollMinSize = new Size(0, actionPanel.Height + 1);
         }
 
         private async Task PostInit()
@@ -33,23 +42,18 @@ namespace TrayLink
 
         private void inputReloadConfig(object sender, EventArgs e)
         {
-            string filePath = "actions.json";
+            string filePath = "actions.ini";
             if (!File.Exists(filePath))
             {
-                MessageBox.Show($"Configuration file '{filePath}' not found.\n Generating new Config.", "Oops...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Configuration file '{filePath}' not found.\nGenerating new Config.", "Oops...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 createDefaultConfig();
                 return;
             }
+
             try
             {
-                string json = File.ReadAllText(filePath);
-                var loaded = JsonSerializer.Deserialize<List<ActionConfig>>(json);
-
-                if (loaded != null)
-                {
-                    actions = loaded;
-                    populateActionCards();
-                }
+                actions = LoadActionsFromIni(filePath);
+                populateActionCards();
             }
             catch (Exception ex)
             {
@@ -57,6 +61,62 @@ namespace TrayLink
             }
         }
 
+        private List<ActionConfig> LoadActionsFromIni(string filePath)
+        {
+            var actions = new List<ActionConfig>();
+            ActionConfig current = null;
+
+            foreach (var line in File.ReadAllLines(filePath))
+            {
+                var trimmed = line.Trim();
+
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith(";"))
+                    continue;
+
+                if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+                {
+                    if (current != null)
+                        actions.Add(current);
+                    current = new ActionConfig();
+                }
+                else if (current != null && trimmed.Contains('='))
+                {
+                    var parts = trimmed.Split('=', 2);
+                    var key = parts[0].Trim().ToLower();
+                    var value = parts[1].Trim();
+
+                    switch (key)
+                    {
+                        case "actionname": current.ActionName = value; break;
+                        case "actiontype": current.ActionType = value; break;
+                        case "pathorurl": current.PathOrUrl = value; break;
+                    }
+                }
+            }
+
+            if (current != null)
+                actions.Add(current);
+
+            return actions;
+        }
+
+
+        private void SaveActionsToIni(string filePath, List<ActionConfig> actions)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < actions.Count; i++)
+            {
+                sb.AppendLine($"[Action{i + 1}]");
+                sb.AppendLine($"ActionName={actions[i].ActionName}");
+                sb.AppendLine($"ActionType={actions[i].ActionType}");
+                sb.AppendLine($"PathOrUrl={actions[i].PathOrUrl}");
+                sb.AppendLine();
+            }
+
+            File.WriteAllText(filePath, sb.ToString());
+            machineReload();
+        }
         private void populateActionCards()
         {
             actionPanel.Controls.Clear();
@@ -67,23 +127,25 @@ namespace TrayLink
             }
         }
 
+        private async Task machineReload()
+        {
+            await Task.Delay(250);
+            inputReloadConfig(null, null);
+        }
         private ActionConfig createDefaultConfig()
         {
             try
             {
                 var defaultAction = new ActionConfig
                 {
-                    ActionName = "Default Action",
-                    ActionType = "URL/EXE/PATH",
-                    PathOrUrl = "Filepath/Path/URL"
+                    ActionName = "Open Notepad",
+                    ActionType = "FILE",
+                    PathOrUrl = "notepad.exe"
                 };
-                var defaultActions = new List<ActionConfig> { defaultAction };
 
-                string json = JsonSerializer.Serialize(defaultActions, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllTextAsync("actions.json", json);
-
+                actions = new List<ActionConfig> { defaultAction };
+                SaveActionsToIni("actions.ini", actions);
                 return defaultAction;
-
             }
             catch (Exception ex)
             {
@@ -92,12 +154,16 @@ namespace TrayLink
             }
         }
 
-
-
-
-    /*   private void test(object sender, EventArgs e)
-       {
-
-       }*/
-}
+        private void inputOpenConfig(object sender, EventArgs e)
+        {
+            try
+            {
+             Process.Start(new ProcessStartInfo("actions.ini") { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening configuration file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
 }

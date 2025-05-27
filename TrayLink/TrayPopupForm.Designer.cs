@@ -85,6 +85,7 @@
             buttonOpenCFG.TabIndex = 4;
             buttonOpenCFG.Text = "Open";
             buttonOpenCFG.UseVisualStyleBackColor = true;
+            buttonOpenCFG.Click += inputOpenConfig;
             // 
             // label2
             // 
