@@ -6,7 +6,20 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>TrayLink.ico</ApplicationIcon>
+    <PackageIcon>TrayLink.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="TrayLink.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Resources\TrayLink.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Tomlyn" Version="0.19.0" />
