@@ -15,6 +15,7 @@ namespace TrayLink
             InitializeComponent();
             PostInit();
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.Icon = Program.TrayLinkIcon;
             this.StartPosition = FormStartPosition.Manual;
             this.ShowInTaskbar = false;
             this.TopMost = true;

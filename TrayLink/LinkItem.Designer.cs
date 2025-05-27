@@ -28,15 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LinkItem));
             labelType = new Label();
             labelName = new Label();
             buttonExecute = new Button();
+            imageList1 = new ImageList(components);
+            label1 = new Label();
             SuspendLayout();
             // 
             // labelType
             // 
+            labelType.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             labelType.AutoSize = true;
-            labelType.Location = new Point(38, 58);
+            labelType.ForeColor = SystemColors.HotTrack;
+            labelType.ImageAlign = ContentAlignment.BottomLeft;
+            labelType.Location = new Point(82, 65);
             labelType.Name = "labelType";
             labelType.Size = new Size(41, 20);
             labelType.TabIndex = 0;
@@ -45,27 +52,50 @@
             // labelName
             // 
             labelName.AutoSize = true;
-            labelName.Location = new Point(28, 18);
+            labelName.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelName.ImageAlign = ContentAlignment.TopLeft;
+            labelName.Location = new Point(3, 18);
             labelName.Name = "labelName";
-            labelName.Size = new Size(51, 20);
+            labelName.Size = new Size(60, 23);
             labelName.TabIndex = 1;
             labelName.Text = "NAME";
             // 
             // buttonExecute
             // 
-            buttonExecute.Location = new Point(136, 18);
+            buttonExecute.Anchor = AnchorStyles.Right;
+            buttonExecute.ImageKey = "rocket.png";
+            buttonExecute.ImageList = imageList1;
+            buttonExecute.Location = new Point(168, 18);
             buttonExecute.Name = "buttonExecute";
-            buttonExecute.Size = new Size(114, 67);
+            buttonExecute.Size = new Size(82, 67);
             buttonExecute.TabIndex = 2;
-            buttonExecute.Text = "EXECUTE";
             buttonExecute.UseVisualStyleBackColor = true;
             buttonExecute.Click += inputExecute;
+            // 
+            // imageList1
+            // 
+            imageList1.ColorDepth = ColorDepth.Depth32Bit;
+            imageList1.ImageStream = (ImageListStreamer)resources.GetObject("imageList1.ImageStream");
+            imageList1.TransparentColor = Color.Transparent;
+            imageList1.Images.SetKeyName(0, "rocket.png");
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label1.AutoSize = true;
+            label1.ImageAlign = ContentAlignment.BottomLeft;
+            label1.Location = new Point(12, 65);
+            label1.Name = "label1";
+            label1.Size = new Size(73, 20);
+            label1.TabIndex = 3;
+            label1.Text = "Link Type:";
             // 
             // LinkItem
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BorderStyle = BorderStyle.FixedSingle;
+            Controls.Add(label1);
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
             Controls.Add(labelType);
@@ -80,5 +110,7 @@
         private Label labelType;
         private Label labelName;
         private Button buttonExecute;
+        private ImageList imageList1;
+        private Label label1;
     }
 }
