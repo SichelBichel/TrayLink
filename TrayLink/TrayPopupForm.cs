@@ -189,5 +189,18 @@ namespace TrayLink
                 actionPanel.Controls.Add(deviceCard);
             }
         }
+
+        private void inputUpdate(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string url = "https://rehoga-interactive.com/traylink/";
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening update link: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

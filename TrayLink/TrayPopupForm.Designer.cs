@@ -142,6 +142,7 @@
             linkLabel1.TabIndex = 9;
             linkLabel1.TabStop = true;
             linkLabel1.Text = "Update";
+            linkLabel1.LinkClicked += inputUpdate;
             // 
             // TrayPopupForm
             // 
