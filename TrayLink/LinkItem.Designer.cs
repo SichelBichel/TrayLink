@@ -51,12 +51,11 @@
             // 
             // labelName
             // 
-            labelName.AutoSize = true;
             labelName.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             labelName.ImageAlign = ContentAlignment.TopLeft;
-            labelName.Location = new Point(3, 18);
+            labelName.Location = new Point(12, 10);
             labelName.Name = "labelName";
-            labelName.Size = new Size(60, 23);
+            labelName.Size = new Size(177, 50);
             labelName.TabIndex = 1;
             labelName.Text = "NAME";
             // 
@@ -65,9 +64,9 @@
             buttonExecute.Anchor = AnchorStyles.Right;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;
-            buttonExecute.Location = new Point(168, 18);
+            buttonExecute.Location = new Point(195, 18);
             buttonExecute.Name = "buttonExecute";
-            buttonExecute.Size = new Size(82, 67);
+            buttonExecute.Size = new Size(67, 67);
             buttonExecute.TabIndex = 2;
             buttonExecute.UseVisualStyleBackColor = true;
             buttonExecute.Click += inputExecute;
