@@ -53,9 +53,9 @@
             // 
             // buttonExecute
             // 
-            buttonExecute.Location = new Point(136, 36);
+            buttonExecute.Location = new Point(136, 18);
             buttonExecute.Name = "buttonExecute";
-            buttonExecute.Size = new Size(114, 42);
+            buttonExecute.Size = new Size(114, 67);
             buttonExecute.TabIndex = 2;
             buttonExecute.Text = "EXECUTE";
             buttonExecute.UseVisualStyleBackColor = true;

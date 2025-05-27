@@ -158,11 +158,34 @@ namespace TrayLink
         {
             try
             {
-             Process.Start(new ProcessStartInfo("actions.ini") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo("actions.ini") { UseShellExecute = true });
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error opening configuration file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void inputSearchQuery(object sender, EventArgs e)
+        {
+            FilteredDeviceCards(searchBar.Text);
+        }
+
+        private void FilteredDeviceCards(string searchTerm)
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            actionPanel.Controls.Clear();
+
+            var filteredActions = actions.Where(s =>
+                string.IsNullOrWhiteSpace(searchTerm) ||
+                s.ActionName.ToLower().Contains(searchTerm) ||
+                s.ActionType.ToLower().Contains(searchTerm) ||
+                s.PathOrUrl.ToLower().Contains(searchTerm)).ToList();
+
+            foreach (var action in filteredActions)
+            {
+                var deviceCard = new LinkItem(action);
+                actionPanel.Controls.Add(deviceCard);
             }
         }
     }

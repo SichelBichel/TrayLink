@@ -29,9 +29,10 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrayPopupForm));
             TrayIcon = new NotifyIcon(components);
             actionPanel = new FlowLayoutPanel();
-            textBox1 = new TextBox();
+            searchBar = new TextBox();
             label1 = new Label();
             buttonReloadCFG = new Button();
             buttonOpenCFG = new Button();
@@ -51,12 +52,13 @@
             actionPanel.Size = new Size(298, 501);
             actionPanel.TabIndex = 0;
             // 
-            // textBox1
+            // searchBar
             // 
-            textBox1.Location = new Point(12, 108);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(298, 27);
-            textBox1.TabIndex = 1;
+            searchBar.Location = new Point(12, 108);
+            searchBar.Name = "searchBar";
+            searchBar.Size = new Size(298, 27);
+            searchBar.TabIndex = 1;
+            searchBar.TextChanged += inputSearchQuery;
             // 
             // label1
             // 
@@ -105,8 +107,9 @@
             Controls.Add(buttonOpenCFG);
             Controls.Add(buttonReloadCFG);
             Controls.Add(label1);
-            Controls.Add(textBox1);
+            Controls.Add(searchBar);
             Controls.Add(actionPanel);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "TrayPopupForm";
             Text = "TrayLink";
             ResumeLayout(false);
@@ -117,7 +120,7 @@
 
         private NotifyIcon TrayIcon;
         private FlowLayoutPanel actionPanel;
-        private TextBox textBox1;
+        private TextBox searchBar;
         private Label label1;
         private Button buttonReloadCFG;
         private Button buttonOpenCFG;
