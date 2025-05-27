@@ -30,11 +30,12 @@
         {
             components = new System.ComponentModel.Container();
             TrayIcon = new NotifyIcon(components);
-            flowLayoutPanel1 = new FlowLayoutPanel();
+            actionPanel = new FlowLayoutPanel();
             textBox1 = new TextBox();
             label1 = new Label();
             buttonReloadCFG = new Button();
             buttonOpenCFG = new Button();
+            label2 = new Label();
             SuspendLayout();
             // 
             // TrayIcon
@@ -42,17 +43,17 @@
             TrayIcon.Text = "TrayLink";
             TrayIcon.Visible = true;
             // 
-            // flowLayoutPanel1
+            // actionPanel
             // 
-            flowLayoutPanel1.BorderStyle = BorderStyle.FixedSingle;
-            flowLayoutPanel1.Location = new Point(12, 166);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(298, 476);
-            flowLayoutPanel1.TabIndex = 0;
+            actionPanel.BorderStyle = BorderStyle.FixedSingle;
+            actionPanel.Location = new Point(12, 141);
+            actionPanel.Name = "actionPanel";
+            actionPanel.Size = new Size(298, 501);
+            actionPanel.TabIndex = 0;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(12, 133);
+            textBox1.Location = new Point(12, 108);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(298, 27);
             textBox1.TabIndex = 1;
@@ -60,7 +61,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 110);
+            label1.Location = new Point(12, 85);
             label1.Name = "label1";
             label1.Size = new Size(56, 20);
             label1.TabIndex = 2;
@@ -68,32 +69,43 @@
             // 
             // buttonReloadCFG
             // 
-            buttonReloadCFG.Location = new Point(172, 56);
+            buttonReloadCFG.Location = new Point(172, 40);
             buttonReloadCFG.Name = "buttonReloadCFG";
             buttonReloadCFG.Size = new Size(138, 42);
             buttonReloadCFG.TabIndex = 3;
             buttonReloadCFG.Text = "Reload";
             buttonReloadCFG.UseVisualStyleBackColor = true;
+            buttonReloadCFG.Click += inputReloadConfig;
             // 
             // buttonOpenCFG
             // 
-            buttonOpenCFG.Location = new Point(12, 56);
+            buttonOpenCFG.Location = new Point(12, 40);
             buttonOpenCFG.Name = "buttonOpenCFG";
-            buttonOpenCFG.Size = new Size(133, 42);
+            buttonOpenCFG.Size = new Size(138, 42);
             buttonOpenCFG.TabIndex = 4;
             buttonOpenCFG.Text = "Open";
             buttonOpenCFG.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(12, 17);
+            label2.Name = "label2";
+            label2.Size = new Size(56, 20);
+            label2.TabIndex = 5;
+            label2.Text = "Config:";
             // 
             // TrayPopupForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(322, 654);
+            Controls.Add(label2);
             Controls.Add(buttonOpenCFG);
             Controls.Add(buttonReloadCFG);
             Controls.Add(label1);
             Controls.Add(textBox1);
-            Controls.Add(flowLayoutPanel1);
+            Controls.Add(actionPanel);
             Name = "TrayPopupForm";
             Text = "TrayLink";
             ResumeLayout(false);
@@ -103,10 +115,11 @@
         #endregion
 
         private NotifyIcon TrayIcon;
-        private FlowLayoutPanel flowLayoutPanel1;
+        private FlowLayoutPanel actionPanel;
         private TextBox textBox1;
         private Label label1;
         private Button buttonReloadCFG;
         private Button buttonOpenCFG;
+        private Label label2;
     }
 }

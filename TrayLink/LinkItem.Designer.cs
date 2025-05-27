@@ -36,7 +36,7 @@
             // labelType
             // 
             labelType.AutoSize = true;
-            labelType.Location = new Point(26, 18);
+            labelType.Location = new Point(28, 58);
             labelType.Name = "labelType";
             labelType.Size = new Size(41, 20);
             labelType.TabIndex = 0;
@@ -45,7 +45,7 @@
             // labelName
             // 
             labelName.AutoSize = true;
-            labelName.Location = new Point(16, 58);
+            labelName.Location = new Point(28, 18);
             labelName.Name = "labelName";
             labelName.Size = new Size(51, 20);
             labelName.TabIndex = 1;
@@ -53,22 +53,24 @@
             // 
             // buttonExecute
             // 
-            buttonExecute.Location = new Point(159, 36);
+            buttonExecute.Location = new Point(136, 36);
             buttonExecute.Name = "buttonExecute";
             buttonExecute.Size = new Size(114, 42);
             buttonExecute.TabIndex = 2;
             buttonExecute.Text = "EXECUTE";
             buttonExecute.UseVisualStyleBackColor = true;
+            buttonExecute.Click += inputExecute;
             // 
             // LinkItem
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BorderStyle = BorderStyle.FixedSingle;
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
             Controls.Add(labelType);
             Name = "LinkItem";
-            Size = new Size(305, 107);
+            Size = new Size(285, 105);
             ResumeLayout(false);
             PerformLayout();
         }
