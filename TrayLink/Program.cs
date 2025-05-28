@@ -60,6 +60,14 @@ namespace TrayLink
 
         private static void ShowPopupForm()
         {
+            if (popupForm == null || popupForm.IsDisposed)
+            {
+                popupForm = new TrayPopupForm
+                {
+                    Icon = LoadIconFromResources("TrayLink.Resources.TrayLink.ico")
+                };
+            }
+
             if (popupForm.Visible)
             {
                 popupForm.Hide();
