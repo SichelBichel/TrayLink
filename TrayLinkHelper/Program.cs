@@ -29,27 +29,24 @@ namespace TrayLink.Helper
         {
             try
             {
-                // ✅ Get full path to TrayLinkHelper.exe in the same directory
                 string exePath = Path.Combine(AppContext.BaseDirectory, "TrayLinkHelper.exe");
 
                 void AddRegistry(string shellType)
                 {
-                    // Create the shell key under the target type (e.g., * or Directory)
+                 
                     using var key = Registry.ClassesRoot.CreateSubKey($@"{shellType}\shell\AddToTrayLink");
-                    key.SetValue("", "Add to TrayLink"); // Visible menu label
-                    key.SetValue("Icon", exePath);      // Optional: sets tray icon
+                    key.SetValue("", "Add to TrayLink");
+                    key.SetValue("Icon", exePath);      
 
-                    // Command to execute when clicked
+                   
                     using var commandKey = key.CreateSubKey("command");
 
-                    // ✅ THIS LINE IS CRUCIAL — do not change quoting
+              
                     commandKey.SetValue("", $"\"{exePath}\" \"%1\"");
                 }
 
-                // Register for files (*)
                 AddRegistry("*");
 
-                // Register for folders (Directory)
                 AddRegistry("Directory");
 
                 Console.WriteLine("TrayLink context menu registered successfully.");
@@ -62,39 +59,43 @@ namespace TrayLink.Helper
 
 
         private static void AddEntryToConfig(string selectedPath)
-{
-    try
-    {
-        Console.WriteLine($"Received path: {selectedPath}");
-
-        if (!File.Exists(selectedPath) && !Directory.Exists(selectedPath))
         {
-            Console.Error.WriteLine("Error: Path does not exist.");
-            return;
+            try
+            {
+                Console.WriteLine($"Received path: {selectedPath}");
+
+                if (!File.Exists(selectedPath) && !Directory.Exists(selectedPath))
+                {
+                    Console.Error.WriteLine("Error: Path does not exist.");
+                    return;
+                }
+
+                string actionType = File.Exists(selectedPath) ? "FILE" : "PATH";
+                string actionName = Path.GetFileName(selectedPath);
+
+                if (Directory.Exists(selectedPath))
+                {
+                    actionName += " (Folder)";
+                }
+
+                string configPath = Path.Combine(AppContext.BaseDirectory, "actions.ini");
+                Console.WriteLine($"Appending to: {configPath}");
+
+                var sb = new StringBuilder();
+                sb.AppendLine($"[Action{DateTime.Now.Ticks}]");
+                sb.AppendLine($"ActionName=Open {actionName}");
+                sb.AppendLine($"ActionType={actionType}");
+                sb.AppendLine($"PathOrUrl={selectedPath}");
+                sb.AppendLine();
+
+                File.AppendAllText(configPath, sb.ToString());
+
+                Console.WriteLine("Entry added successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error adding to config: {ex.Message}");
+            }
         }
-
-        string actionType = File.Exists(selectedPath) ? "FILE" : "PATH";
-        string actionName = Path.GetFileName(selectedPath);
-        string configPath = Path.Combine(AppContext.BaseDirectory, "actions.ini");
-
-        Console.WriteLine($"Appending to: {configPath}");
-
-        var sb = new StringBuilder();
-        sb.AppendLine($"[Action{DateTime.Now.Ticks}]");
-        sb.AppendLine($"ActionName=Open {actionName}");
-        sb.AppendLine($"ActionType={actionType}");
-        sb.AppendLine($"PathOrUrl={selectedPath}");
-        sb.AppendLine();
-
-        File.AppendAllText(configPath, sb.ToString());
-
-        Console.WriteLine("Entry added successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"Error adding to config: {ex.Message}");
-    }
-}
-
     }
 }
