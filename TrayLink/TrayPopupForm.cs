@@ -13,13 +13,29 @@ namespace TrayLink
         public TrayPopupForm()
         {
             InitializeComponent();
+            chkAutoHide.Checked = Properties.Settings.Default.AutoHide;
             PostInit();
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
             this.Icon = Program.TrayLinkIcon;
             this.StartPosition = FormStartPosition.Manual;
             this.ShowInTaskbar = false;
             this.TopMost = true;
-            this.Deactivate += (s, e) => this.Hide();
+          //  this.Deactivate += (s, e) => this.Hide();
+            EventHandler deactivateHandler = (s, e) => this.Hide();
+
+            if (chkAutoHide.Checked)
+                this.Deactivate += deactivateHandler;
+
+            chkAutoHide.CheckedChanged += (s, e) =>
+            {
+                if (chkAutoHide.Checked)
+                    this.Deactivate += deactivateHandler;
+                else
+                    this.Deactivate -= deactivateHandler;
+
+                Properties.Settings.Default.AutoHide = chkAutoHide.Checked;
+                Properties.Settings.Default.Save();
+            };
             actionPanel.AutoScroll = true;
             actionPanel.HorizontalScroll.Enabled = false;
             actionPanel.HorizontalScroll.Visible = false;
@@ -200,6 +216,23 @@ namespace TrayLink
             catch (Exception ex)
             {
                 MessageBox.Show($"Error opening update link: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void inputShellInteg(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "Setup.bat",
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Shell integration failed:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

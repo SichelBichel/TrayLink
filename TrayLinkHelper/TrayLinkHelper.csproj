@@ -5,6 +5,19 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>TrayLink.ico</ApplicationIcon>
+    <PackageIcon>TrayLink.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="TrayLink.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Resources\TrayLink.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
