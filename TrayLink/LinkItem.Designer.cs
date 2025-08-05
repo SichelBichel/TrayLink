@@ -35,6 +35,7 @@
             buttonExecute = new Button();
             imageList1 = new ImageList(components);
             label1 = new Label();
+            button1 = new Button();
             SuspendLayout();
             // 
             // labelType
@@ -43,9 +44,9 @@
             labelType.AutoSize = true;
             labelType.ForeColor = SystemColors.HotTrack;
             labelType.ImageAlign = ContentAlignment.BottomLeft;
-            labelType.Location = new Point(82, 65);
+            labelType.Location = new Point(72, 49);
             labelType.Name = "labelType";
-            labelType.Size = new Size(41, 20);
+            labelType.Size = new Size(33, 15);
             labelType.TabIndex = 0;
             labelType.Text = "TYPE";
             // 
@@ -53,9 +54,9 @@
             // 
             labelName.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             labelName.ImageAlign = ContentAlignment.TopLeft;
-            labelName.Location = new Point(12, 10);
+            labelName.Location = new Point(10, 8);
             labelName.Name = "labelName";
-            labelName.Size = new Size(177, 50);
+            labelName.Size = new Size(155, 38);
             labelName.TabIndex = 1;
             labelName.Text = "NAME";
             // 
@@ -64,9 +65,10 @@
             buttonExecute.Anchor = AnchorStyles.Right;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;
-            buttonExecute.Location = new Point(195, 18);
+            buttonExecute.Location = new Point(171, 14);
+            buttonExecute.Margin = new Padding(3, 2, 3, 2);
             buttonExecute.Name = "buttonExecute";
-            buttonExecute.Size = new Size(67, 67);
+            buttonExecute.Size = new Size(59, 50);
             buttonExecute.TabIndex = 2;
             buttonExecute.UseVisualStyleBackColor = true;
             buttonExecute.Click += inputExecute;
@@ -77,29 +79,44 @@
             imageList1.ImageStream = (ImageListStreamer)resources.GetObject("imageList1.ImageStream");
             imageList1.TransparentColor = Color.Transparent;
             imageList1.Images.SetKeyName(0, "rocket.png");
+            imageList1.Images.SetKeyName(1, "icon_Uncheck.png");
+            imageList1.Images.SetKeyName(2, "icon_stopall.png");
             // 
             // label1
             // 
             label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label1.AutoSize = true;
             label1.ImageAlign = ContentAlignment.BottomLeft;
-            label1.Location = new Point(12, 65);
+            label1.Location = new Point(10, 49);
             label1.Name = "label1";
-            label1.Size = new Size(73, 20);
+            label1.Size = new Size(59, 15);
             label1.TabIndex = 3;
             label1.Text = "Link Type:";
             // 
+            // button1
+            // 
+            button1.ImageKey = "icon_Uncheck.png";
+            button1.ImageList = imageList1;
+            button1.Location = new Point(123, 45);
+            button1.Name = "button1";
+            button1.Size = new Size(24, 24);
+            button1.TabIndex = 4;
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // LinkItem
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BorderStyle = BorderStyle.FixedSingle;
+            Controls.Add(button1);
             Controls.Add(label1);
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
             Controls.Add(labelType);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "LinkItem";
-            Size = new Size(270, 105);
+            Size = new Size(236, 79);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -111,5 +128,6 @@
         private Button buttonExecute;
         private ImageList imageList1;
         private Label label1;
+        private Button button1;
     }
 }
