@@ -139,7 +139,7 @@
             label3.Name = "label3";
             label3.Size = new Size(41, 15);
             label3.TabIndex = 8;
-            label3.Text = "V 1.1.0";
+            label3.Text = "V 1.2.0";
             // 
             // linkLabel1
             // 

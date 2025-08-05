@@ -35,7 +35,7 @@
             buttonExecute = new Button();
             imageList1 = new ImageList(components);
             label1 = new Label();
-            button1 = new Button();
+            buttonDelete = new Button();
             SuspendLayout();
             // 
             // labelType
@@ -93,23 +93,23 @@
             label1.TabIndex = 3;
             label1.Text = "Link Type:";
             // 
-            // button1
+            // buttonDelete
             // 
-            button1.ImageKey = "icon_Uncheck.png";
-            button1.ImageList = imageList1;
-            button1.Location = new Point(123, 45);
-            button1.Name = "button1";
-            button1.Size = new Size(24, 24);
-            button1.TabIndex = 4;
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            buttonDelete.ImageKey = "icon_Uncheck.png";
+            buttonDelete.ImageList = imageList1;
+            buttonDelete.Location = new Point(123, 45);
+            buttonDelete.Name = "buttonDelete";
+            buttonDelete.Size = new Size(24, 24);
+            buttonDelete.TabIndex = 4;
+            buttonDelete.UseVisualStyleBackColor = true;
+            buttonDelete.Click += inputDeleteEntry;
             // 
             // LinkItem
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BorderStyle = BorderStyle.FixedSingle;
-            Controls.Add(button1);
+            Controls.Add(buttonDelete);
             Controls.Add(label1);
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
@@ -128,6 +128,6 @@
         private Button buttonExecute;
         private ImageList imageList1;
         private Label label1;
-        private Button button1;
+        private Button buttonDelete;
     }
 }

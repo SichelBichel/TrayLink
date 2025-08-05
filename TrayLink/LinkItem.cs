@@ -14,13 +14,13 @@ namespace TrayLink
     public partial class LinkItem : UserControl
     {
         private ActionConfig _config;
-
-        public LinkItem(ActionConfig config)
+        private Action<ActionConfig> _onDelete;
+        public LinkItem(ActionConfig config, Action<ActionConfig> onDelete)
         {
             InitializeComponent();
             _config = config;
+            _onDelete = onDelete;
             ApplyConfig();
-            //  InitializeDynamicUI();
         }
 
         private void ApplyConfig()
@@ -62,9 +62,13 @@ namespace TrayLink
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void inputDeleteEntry(object sender, EventArgs e)
         {
-
+            var result = MessageBox.Show($"Delete '{_config.ActionName}'?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                _onDelete?.Invoke(_config);
+            }
         }
     }
 }

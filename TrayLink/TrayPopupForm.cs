@@ -139,11 +139,16 @@ namespace TrayLink
             actionPanel.Controls.Clear();
             foreach (var action in actions)
             {
-                var card = new LinkItem(action);
+                var card = new LinkItem(action, DeleteAction);
                 actionPanel.Controls.Add(card);
             }
         }
-
+        private void DeleteAction(ActionConfig configToDelete)
+        {
+            var filePath = "actions.ini";
+            actions = actions.Where(a => a.ActionName != configToDelete.ActionName).ToList();
+            SaveActionsToIni(filePath, actions);
+        }
         private async Task machineReload()
         {
             await Task.Delay(250);
@@ -201,7 +206,7 @@ namespace TrayLink
 
             foreach (var action in filteredActions)
             {
-                var deviceCard = new LinkItem(action);
+                var deviceCard = new LinkItem(action, DeleteAction);
                 actionPanel.Controls.Add(deviceCard);
             }
         }
