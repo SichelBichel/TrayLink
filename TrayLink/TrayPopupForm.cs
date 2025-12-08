@@ -179,8 +179,36 @@ namespace TrayLink
         }
         private async Task machineReload()
         {
+
             await Task.Delay(250);
             inputReloadConfig(null, null);
+            CloseAllEditActionForms();
+        }
+
+        private void CloseAllEditActionForms()
+        {
+
+            List<Form> formsToClose = new List<Form>();
+
+            foreach (Form openForm in Application.OpenForms)
+            {
+
+                if (openForm is EditActionForm)
+                {
+                    formsToClose.Add(openForm);
+                }
+            }
+
+            foreach (Form form in formsToClose)
+            {
+
+                if (form.DialogResult == DialogResult.None)
+                {
+                    form.DialogResult = DialogResult.Cancel;
+                }
+
+                form.Close();
+            }
         }
         private ActionConfig createDefaultConfig()
         {

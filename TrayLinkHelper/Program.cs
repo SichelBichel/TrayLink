@@ -83,7 +83,7 @@ namespace TrayLink.Helper
 
                 var sb = new StringBuilder();
                 sb.AppendLine($"[Action{DateTime.Now.Ticks}]");
-                sb.AppendLine($"ActionName=Open {actionName}");
+                sb.AppendLine($"ActionName={actionName}");
                 sb.AppendLine($"ActionType={actionType}");
                 sb.AppendLine($"PathOrUrl={selectedPath}");
                 sb.AppendLine();

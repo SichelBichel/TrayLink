@@ -14,40 +14,65 @@ namespace TrayLink
     {
         public string ActionName { get; private set; }
         public string PathOrUrl { get; private set; }
-        public string ActionType { get; private set; } // Hinzugefügt, um den Typ anzuzeigen
+        public string ActionType { get; private set; }
 
-        // Konstruktor, der die vorhandene Konfiguration übernimmt
         public EditActionForm(ActionConfig config)
         {
             InitializeComponent();
 
+            // ... (Ihre Konfigurations- und UI-Einstellungen)
             textBoxName.Text = config.ActionName;
             textBoxPathOrUrl.Text = config.PathOrUrl;
-            //labelActionType.Text = config.ActionType.ToUpper(); // Zum Anzeigen des Typs
-
             this.ActionType = config.ActionType;
             this.Text = "Eintrag bearbeiten";
             this.StartPosition = FormStartPosition.CenterParent;
 
+            // Nur einmal im Konstruktor anhängen
             buttonOk.Click += ButtonOk_Click;
         }
 
-        private void ButtonOk_Click(object sender, System.EventArgs e)
+        // --- Handler für OK-Button ---
+        private async void ButtonOk_Click(object sender, System.EventArgs e)
         {
-            // Speichert die geänderten Werte
-            ActionName = textBoxName.Text.Trim();
-            PathOrUrl = textBoxPathOrUrl.Text.Trim();
+            string newActionName = textBoxName.Text.Trim();
+            string newPathOrUrl = textBoxPathOrUrl.Text.Trim();
 
-            // Einfache Validierung
-            if (string.IsNullOrWhiteSpace(ActionName) || string.IsNullOrWhiteSpace(PathOrUrl))
+            // 1. Validierung
+            if (string.IsNullOrWhiteSpace(newActionName) || string.IsNullOrWhiteSpace(newPathOrUrl))
             {
                 MessageBox.Show("Name und Pfad/URL dürfen nicht leer sein.", "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.DialogResult = DialogResult.None;
+                return;
             }
-            else
+
+            // 2. Werte speichern
+            ActionName = newActionName;
+            PathOrUrl = newPathOrUrl;
+
+            // 3. DialogResult setzen
+            // Das Setzen auf OK signalisiert ShowDialog(), dass die Operation erfolgreich war.
+            this.DialogResult = DialogResult.OK;
+
+            // 4. SELBSTZERSTÖRUNG: Asynchroner Force Close
+            // Die Verzögerung von 1 Millisekunde (oder sogar 0) gibt dem UI-Thread kurz Zeit, 
+            // das DialogResult zu verarbeiten. Danach erzwingen wir das Schließen.
+            await Task.Delay(1);
+
+            // Erzwingt das sofortige Schließen des Formulars.
+            this.Close();
+        }
+
+
+        // --- Handler für das Kreuz (X) ---
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            // Wenn das Formular ohne DialogResult geschlossen wird (z.B. durch X), 
+            // setzen wir es explizit auf Cancel, um sicherzustellen, dass ShowDialog() zurückkehrt.
+            if (this.DialogResult == DialogResult.None)
             {
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                this.DialogResult = DialogResult.Cancel;
             }
         }
     }
