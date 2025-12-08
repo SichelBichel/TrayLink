@@ -139,8 +139,36 @@ namespace TrayLink
             actionPanel.Controls.Clear();
             foreach (var action in actions)
             {
-                var card = new LinkItem(action, DeleteAction);
+                var card = new LinkItem(action, DeleteAction, EditAction);
+                card.Width = actionPanel.Width - (actionPanel.VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0) - 10;
                 actionPanel.Controls.Add(card);
+            }
+        }
+
+        private void EditAction(ActionConfig configToEdit)
+        {
+
+            var originalConfig = new ActionConfig
+            {
+                ActionName = configToEdit.ActionName,
+                ActionType = configToEdit.ActionType,
+                PathOrUrl = configToEdit.PathOrUrl
+            };
+
+            using (var editForm = new EditActionForm(originalConfig))
+            {
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    int index = actions.FindIndex(a => a.ActionName == configToEdit.ActionName);
+
+                    if (index != -1)
+                    {
+                        actions[index].ActionName = editForm.ActionName;
+                        actions[index].PathOrUrl = editForm.PathOrUrl;
+
+                        SaveActionsToIni("actions.ini", actions);
+                    }
+                }
             }
         }
         private void DeleteAction(ActionConfig configToDelete)
@@ -206,7 +234,7 @@ namespace TrayLink
 
             foreach (var action in filteredActions)
             {
-                var deviceCard = new LinkItem(action, DeleteAction);
+                var deviceCard = new LinkItem(action, DeleteAction, EditAction);
                 actionPanel.Controls.Add(deviceCard);
             }
         }
