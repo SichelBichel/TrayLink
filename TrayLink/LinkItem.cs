@@ -16,12 +16,16 @@ namespace TrayLink
         private ActionConfig _config;
         private Action<ActionConfig> _onDelete;
         private Action<ActionConfig> _onEdit;
-        public LinkItem(ActionConfig config, Action<ActionConfig> onDelete, Action<ActionConfig> onEdit)
+        private Action<ActionConfig> _onMoveUp;
+        private Action<ActionConfig> _onMoveDown;
+        public LinkItem(ActionConfig config, Action<ActionConfig> onDelete, Action<ActionConfig> onEdit, Action<ActionConfig> onMoveUp, Action<ActionConfig> onMoveDown)
         {
             InitializeComponent();
             _config = config;
             _onDelete = onDelete;
             _onEdit = onEdit;
+            _onMoveUp = onMoveUp;
+            _onMoveDown = onMoveDown;
             ApplyConfig();
         }
 
@@ -31,6 +35,11 @@ namespace TrayLink
             labelName.Text = _config.ActionName;
             buttonExecute.Click += (s, e) => ExecuteAction(_config);
             buttonEdit.Click += inputEditEntry;
+
+            //buttonUp.Click += ClickMoveUp;
+            //buttonDown.Click += clickMoveDown;
+
+           // buttonDelete.Click += inputDeleteEntry;
         }
 
         private void ExecuteAction(ActionConfig config)
@@ -77,6 +86,18 @@ namespace TrayLink
         private void inputEditEntry(object sender, EventArgs e)
         {
             _onEdit?.Invoke(_config);
+        }
+
+        private void button2_Click(object sender, EventArgs e){}
+
+        private void ClickMoveUp(object sender, EventArgs e)
+        {
+            _onMoveUp?.Invoke(_config);
+        }
+
+        private void clickMoveDown(object sender, EventArgs e)
+        {
+            _onMoveDown?.Invoke(_config);
         }
     }
 }

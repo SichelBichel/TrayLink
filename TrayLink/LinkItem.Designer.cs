@@ -34,10 +34,11 @@
             labelName = new Label();
             buttonExecute = new Button();
             imageList1 = new ImageList(components);
-            label1 = new Label();
             buttonDelete = new Button();
             buttonEdit = new Button();
             imageListIcons = new ImageList(components);
+            buttonUp = new Button();
+            buttonDown = new Button();
             SuspendLayout();
             // 
             // labelType
@@ -46,7 +47,7 @@
             labelType.AutoSize = true;
             labelType.ForeColor = SystemColors.HotTrack;
             labelType.ImageAlign = ContentAlignment.BottomLeft;
-            labelType.Location = new Point(82, 65);
+            labelType.Location = new Point(11, 71);
             labelType.Name = "labelType";
             labelType.Size = new Size(41, 20);
             labelType.TabIndex = 0;
@@ -67,7 +68,7 @@
             buttonExecute.Anchor = AnchorStyles.Right;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;
-            buttonExecute.Location = new Point(195, 19);
+            buttonExecute.Location = new Point(195, 17);
             buttonExecute.Name = "buttonExecute";
             buttonExecute.Size = new Size(67, 67);
             buttonExecute.TabIndex = 2;
@@ -83,22 +84,11 @@
             imageList1.Images.SetKeyName(1, "icon_Uncheck.png");
             imageList1.Images.SetKeyName(2, "icon_stopall.png");
             // 
-            // label1
-            // 
-            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            label1.AutoSize = true;
-            label1.ImageAlign = ContentAlignment.BottomLeft;
-            label1.Location = new Point(11, 65);
-            label1.Name = "label1";
-            label1.Size = new Size(73, 20);
-            label1.TabIndex = 3;
-            label1.Text = "Link Type:";
-            // 
             // buttonDelete
             // 
             buttonDelete.ImageKey = "icon_Uncheck.png";
             buttonDelete.ImageList = imageList1;
-            buttonDelete.Location = new Point(129, 59);
+            buttonDelete.Location = new Point(58, 65);
             buttonDelete.Margin = new Padding(3, 4, 3, 4);
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new Size(27, 32);
@@ -110,7 +100,7 @@
             // 
             buttonEdit.ImageKey = "icon_Edit.png";
             buttonEdit.ImageList = imageListIcons;
-            buttonEdit.Location = new Point(161, 59);
+            buttonEdit.Location = new Point(91, 65);
             buttonEdit.Margin = new Padding(3, 4, 3, 4);
             buttonEdit.Name = "buttonEdit";
             buttonEdit.Size = new Size(27, 32);
@@ -150,19 +140,44 @@
             imageListIcons.Images.SetKeyName(24, "icon_remove.png");
             imageListIcons.Images.SetKeyName(25, "icon_clearconsole.png");
             // 
+            // buttonUp
+            // 
+            buttonUp.ImageKey = "icon_upload.png";
+            buttonUp.ImageList = imageListIcons;
+            buttonUp.Location = new Point(124, 65);
+            buttonUp.Margin = new Padding(3, 4, 3, 4);
+            buttonUp.Name = "buttonUp";
+            buttonUp.Size = new Size(27, 32);
+            buttonUp.TabIndex = 6;
+            buttonUp.UseVisualStyleBackColor = true;
+            buttonUp.Click += ClickMoveUp;
+            // 
+            // buttonDown
+            // 
+            buttonDown.ImageKey = "icon_download.png";
+            buttonDown.ImageList = imageListIcons;
+            buttonDown.Location = new Point(157, 65);
+            buttonDown.Margin = new Padding(3, 4, 3, 4);
+            buttonDown.Name = "buttonDown";
+            buttonDown.Size = new Size(27, 32);
+            buttonDown.TabIndex = 7;
+            buttonDown.UseVisualStyleBackColor = true;
+            buttonDown.Click += clickMoveDown;
+            // 
             // LinkItem
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BorderStyle = BorderStyle.FixedSingle;
+            Controls.Add(buttonDown);
+            Controls.Add(buttonUp);
             Controls.Add(buttonEdit);
             Controls.Add(buttonDelete);
-            Controls.Add(label1);
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
             Controls.Add(labelType);
             Name = "LinkItem";
-            Size = new Size(270, 105);
+            Size = new Size(270, 101);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -173,9 +188,10 @@
         private Label labelName;
         private Button buttonExecute;
         private ImageList imageList1;
-        private Label label1;
         private Button buttonDelete;
         private Button buttonEdit;
         private ImageList imageListIcons;
+        private Button buttonUp;
+        private Button buttonDown;
     }
 }

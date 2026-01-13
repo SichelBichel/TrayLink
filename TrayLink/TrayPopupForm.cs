@@ -139,7 +139,7 @@ namespace TrayLink
             actionPanel.Controls.Clear();
             foreach (var action in actions)
             {
-                var card = new LinkItem(action, DeleteAction, EditAction);
+                var card = new LinkItem(action, DeleteAction, EditAction, MoveActionUp, MoveActionDown);
                 card.Width = actionPanel.Width - (actionPanel.VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0) - 10;
                 actionPanel.Controls.Add(card);
             }
@@ -262,7 +262,7 @@ namespace TrayLink
 
             foreach (var action in filteredActions)
             {
-                var deviceCard = new LinkItem(action, DeleteAction, EditAction);
+                var deviceCard = new LinkItem(action, DeleteAction, EditAction, MoveActionUp, MoveActionDown);
                 actionPanel.Controls.Add(deviceCard);
             }
         }
@@ -294,6 +294,29 @@ namespace TrayLink
             catch (Exception ex)
             {
                 MessageBox.Show($"Shell integration failed:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        private void MoveActionUp(ActionConfig config)
+        {
+            int index = actions.IndexOf(config);
+            if (index > 0)
+            {
+                actions.RemoveAt(index);
+                actions.Insert(index - 1, config);
+                SaveActionsToIni("actions.ini", actions);
+            }
+        }
+
+        private void MoveActionDown(ActionConfig config)
+        {
+            int index = actions.IndexOf(config);
+            if (index < actions.Count - 1)
+            {
+                actions.RemoveAt(index);
+                actions.Insert(index + 1, config);
+                SaveActionsToIni("actions.ini", actions);
             }
         }
     }
