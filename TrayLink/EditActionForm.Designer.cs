@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditActionForm));
             textBoxName = new TextBox();
             textBoxPathOrUrl = new TextBox();
             label1 = new Label();
@@ -86,6 +87,7 @@
             Controls.Add(label1);
             Controls.Add(textBoxPathOrUrl);
             Controls.Add(textBoxName);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "EditActionForm";
             Text = "Edit";
             ResumeLayout(false);
