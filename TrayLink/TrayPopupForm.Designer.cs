@@ -54,6 +54,7 @@
             // 
             // actionPanel
             // 
+            actionPanel.BackColor = SystemColors.ButtonShadow;
             actionPanel.BorderStyle = BorderStyle.FixedSingle;
             actionPanel.Location = new Point(11, 263);
             actionPanel.Name = "actionPanel";
@@ -62,6 +63,7 @@
             // 
             // searchBar
             // 
+            searchBar.BackColor = SystemColors.ScrollBar;
             searchBar.Location = new Point(11, 212);
             searchBar.Name = "searchBar";
             searchBar.Size = new Size(298, 27);
@@ -71,6 +73,7 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.ForeColor = Color.White;
             label1.Location = new Point(11, 188);
             label1.Name = "label1";
             label1.Size = new Size(56, 20);
@@ -79,27 +82,32 @@
             // 
             // buttonReloadCFG
             // 
+            buttonReloadCFG.BackColor = SystemColors.ControlDark;
+            buttonReloadCFG.ForeColor = SystemColors.ActiveCaptionText;
             buttonReloadCFG.Location = new Point(117, 144);
             buttonReloadCFG.Name = "buttonReloadCFG";
             buttonReloadCFG.Size = new Size(101, 43);
             buttonReloadCFG.TabIndex = 3;
             buttonReloadCFG.Text = "Reload";
-            buttonReloadCFG.UseVisualStyleBackColor = true;
+            buttonReloadCFG.UseVisualStyleBackColor = false;
             buttonReloadCFG.Click += inputReloadConfig;
             // 
             // buttonOpenCFG
             // 
+            buttonOpenCFG.BackColor = SystemColors.ControlDark;
+            buttonOpenCFG.ForeColor = SystemColors.ActiveCaptionText;
             buttonOpenCFG.Location = new Point(11, 144);
             buttonOpenCFG.Name = "buttonOpenCFG";
             buttonOpenCFG.Size = new Size(98, 43);
             buttonOpenCFG.TabIndex = 4;
             buttonOpenCFG.Text = "Open";
-            buttonOpenCFG.UseVisualStyleBackColor = true;
+            buttonOpenCFG.UseVisualStyleBackColor = false;
             buttonOpenCFG.Click += inputOpenConfig;
             // 
             // label2
             // 
             label2.AutoSize = true;
+            label2.ForeColor = Color.White;
             label2.Location = new Point(10, 121);
             label2.Name = "label2";
             label2.Size = new Size(56, 20);
@@ -129,15 +137,17 @@
             // label3
             // 
             label3.AutoSize = true;
+            label3.ForeColor = Color.White;
             label3.Location = new Point(255, 15);
             label3.Name = "label3";
             label3.Size = new Size(52, 20);
             label3.TabIndex = 8;
-            label3.Text = "V 1.4.0";
+            label3.Text = "V 1.4.1";
             // 
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
+            linkLabel1.LinkColor = Color.DeepSkyBlue;
             linkLabel1.Location = new Point(251, 45);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(58, 20);
@@ -148,19 +158,22 @@
             // 
             // button1
             // 
+            button1.BackColor = SystemColors.ControlDark;
             button1.Font = new Font("Segoe UI", 8F);
+            button1.ForeColor = SystemColors.ActiveCaptionText;
             button1.Location = new Point(14, 80);
             button1.Margin = new Padding(3, 4, 3, 4);
             button1.Name = "button1";
             button1.Size = new Size(295, 33);
             button1.TabIndex = 10;
             button1.Text = "Shell Integration Setup";
-            button1.UseVisualStyleBackColor = true;
+            button1.UseVisualStyleBackColor = false;
             button1.Click += inputShellInteg;
             // 
             // chkAutoHide
             // 
             chkAutoHide.AutoSize = true;
+            chkAutoHide.ForeColor = Color.White;
             chkAutoHide.Location = new Point(224, 144);
             chkAutoHide.Margin = new Padding(3, 4, 3, 4);
             chkAutoHide.Name = "chkAutoHide";
@@ -173,6 +186,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(322, 805);
             Controls.Add(chkAutoHide);
             Controls.Add(button1);

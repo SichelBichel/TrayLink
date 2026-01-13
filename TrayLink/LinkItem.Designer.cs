@@ -66,13 +66,14 @@
             // buttonExecute
             // 
             buttonExecute.Anchor = AnchorStyles.Right;
+            buttonExecute.BackColor = SystemColors.ControlLight;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;
             buttonExecute.Location = new Point(195, 17);
             buttonExecute.Name = "buttonExecute";
             buttonExecute.Size = new Size(67, 67);
             buttonExecute.TabIndex = 2;
-            buttonExecute.UseVisualStyleBackColor = true;
+            buttonExecute.UseVisualStyleBackColor = false;
             buttonExecute.Click += inputExecute;
             // 
             // imageList1
@@ -168,6 +169,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ControlLight;
             BorderStyle = BorderStyle.FixedSingle;
             Controls.Add(buttonDown);
             Controls.Add(buttonUp);

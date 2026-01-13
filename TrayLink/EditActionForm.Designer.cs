@@ -38,6 +38,7 @@
             // 
             // textBoxName
             // 
+            textBoxName.BackColor = SystemColors.ScrollBar;
             textBoxName.Location = new Point(81, 22);
             textBoxName.Name = "textBoxName";
             textBoxName.Size = new Size(280, 27);
@@ -45,6 +46,7 @@
             // 
             // textBoxPathOrUrl
             // 
+            textBoxPathOrUrl.BackColor = SystemColors.ScrollBar;
             textBoxPathOrUrl.Location = new Point(81, 75);
             textBoxPathOrUrl.Name = "textBoxPathOrUrl";
             textBoxPathOrUrl.Size = new Size(625, 27);
@@ -53,6 +55,7 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.ForeColor = SystemColors.ControlLightLight;
             label1.Location = new Point(25, 25);
             label1.Name = "label1";
             label1.Size = new Size(52, 20);
@@ -62,6 +65,7 @@
             // label2
             // 
             label2.AutoSize = true;
+            label2.ForeColor = SystemColors.ControlLightLight;
             label2.Location = new Point(12, 78);
             label2.Name = "label2";
             label2.Size = new Size(65, 20);
@@ -81,6 +85,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(732, 183);
             Controls.Add(buttonOk);
             Controls.Add(label2);
