@@ -116,7 +116,7 @@
             // 
             // pictureBox1
             // 
-            pictureBox1.Image = Properties.Resources.ReHoGaBanner3_0_Transparent;
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
             pictureBox1.Location = new Point(11, 4);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(162, 69);
@@ -142,7 +142,7 @@
             label3.Name = "label3";
             label3.Size = new Size(52, 20);
             label3.TabIndex = 8;
-            label3.Text = "V 1.4.1";
+            label3.Text = "V 1.4.2";
             // 
             // linkLabel1
             // 
