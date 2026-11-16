@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LinkItem));
             labelType = new Label();
             labelName = new Label();
+            labelPos = new Label();
             buttonExecute = new Button();
             imageList1 = new ImageList(components);
             buttonDelete = new Button();
@@ -39,6 +40,7 @@
             imageListIcons = new ImageList(components);
             buttonUp = new Button();
             buttonDown = new Button();
+            toolTip = new ToolTip(components);
             SuspendLayout();
             // 
             // labelType
@@ -52,16 +54,32 @@
             labelType.Size = new Size(41, 20);
             labelType.TabIndex = 0;
             labelType.Text = "TYPE";
+            labelType.UseMnemonic = false;
             // 
             // labelName
             // 
+            labelName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelName.AutoEllipsis = true;
             labelName.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             labelName.ImageAlign = ContentAlignment.TopLeft;
-            labelName.Location = new Point(11, 11);
+            labelName.Location = new Point(11, 22);
             labelName.Name = "labelName";
-            labelName.Size = new Size(177, 51);
+            labelName.Size = new Size(177, 42);
             labelName.TabIndex = 1;
             labelName.Text = "NAME";
+            labelName.UseMnemonic = false;
+            // 
+            // labelPos
+            // 
+            labelPos.AutoSize = true;
+            labelPos.Font = new Font("Segoe UI", 7.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelPos.ForeColor = SystemColors.GrayText;
+            labelPos.Location = new Point(11, 4);
+            labelPos.Name = "labelPos";
+            labelPos.Size = new Size(20, 17);
+            labelPos.TabIndex = 8;
+            labelPos.Text = "#1";
+            labelPos.UseMnemonic = false;
             // 
             // buttonExecute
             // 
@@ -73,6 +91,8 @@
             buttonExecute.Name = "buttonExecute";
             buttonExecute.Size = new Size(67, 67);
             buttonExecute.TabIndex = 2;
+            buttonExecute.Cursor = Cursors.Hand;
+            toolTip.SetToolTip(buttonExecute, "Open");
             buttonExecute.UseVisualStyleBackColor = false;
             buttonExecute.Click += inputExecute;
             // 
@@ -94,6 +114,8 @@
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new Size(27, 32);
             buttonDelete.TabIndex = 4;
+            buttonDelete.Cursor = Cursors.Hand;
+            toolTip.SetToolTip(buttonDelete, "Delete");
             buttonDelete.UseVisualStyleBackColor = true;
             buttonDelete.Click += inputDeleteEntry;
             // 
@@ -106,6 +128,8 @@
             buttonEdit.Name = "buttonEdit";
             buttonEdit.Size = new Size(27, 32);
             buttonEdit.TabIndex = 5;
+            buttonEdit.Cursor = Cursors.Hand;
+            toolTip.SetToolTip(buttonEdit, "Edit");
             buttonEdit.UseVisualStyleBackColor = true;
             buttonEdit.Click += inputEditEntry;
             // 
@@ -150,6 +174,8 @@
             buttonUp.Name = "buttonUp";
             buttonUp.Size = new Size(27, 32);
             buttonUp.TabIndex = 6;
+            buttonUp.Cursor = Cursors.Hand;
+            toolTip.SetToolTip(buttonUp, "Move up");
             buttonUp.UseVisualStyleBackColor = true;
             buttonUp.Click += ClickMoveUp;
             // 
@@ -162,6 +188,8 @@
             buttonDown.Name = "buttonDown";
             buttonDown.Size = new Size(27, 32);
             buttonDown.TabIndex = 7;
+            buttonDown.Cursor = Cursors.Hand;
+            toolTip.SetToolTip(buttonDown, "Move down");
             buttonDown.UseVisualStyleBackColor = true;
             buttonDown.Click += clickMoveDown;
             // 
@@ -177,6 +205,7 @@
             Controls.Add(buttonDelete);
             Controls.Add(buttonExecute);
             Controls.Add(labelName);
+            Controls.Add(labelPos);
             Controls.Add(labelType);
             Name = "LinkItem";
             Size = new Size(270, 101);
@@ -188,6 +217,7 @@
 
         private Label labelType;
         private Label labelName;
+        private Label labelPos;
         private Button buttonExecute;
         private ImageList imageList1;
         private Button buttonDelete;
@@ -195,5 +225,6 @@
         private ImageList imageListIcons;
         private Button buttonUp;
         private Button buttonDown;
+        private ToolTip toolTip;
     }
 }

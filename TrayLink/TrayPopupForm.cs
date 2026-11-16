@@ -1,323 +1,573 @@
 using System.Diagnostics;
-using System.Security.AccessControl;
-using System.Text;
-using System.Text.Json;
-using Tomlyn;
+using TrayLink.Core;
+using TrayLink.Updater;
 
 namespace TrayLink
 {
-    public partial class TrayPopupForm : Form
+    public partial class TrayPopupForm : Form, ILinkItemHost
     {
+        private List<ActionConfig> _actions = new();
 
-        private List<ActionConfig> actions = new();
+        /// <summary>Text of actions.ini as we last read or wrote it. Used to detect external changes.</summary>
+        private string _lastKnownText = "";
+
+        private readonly FileSystemWatcher? _watcher;
+        private readonly System.Windows.Forms.Timer _reloadDebounce = new() { Interval = 300 };
+
+        private readonly int _designHeight;
+        private int _modalDepth;
+        private bool _dragging;
+        private bool _reloadPending;
+        private bool _repopulateQueued;
+        private bool _updateRunning;
+        private DateTime _autoHiddenAtUtc = DateTime.MinValue;
+
         public TrayPopupForm()
         {
             InitializeComponent();
-            chkAutoHide.Checked = Properties.Settings.Default.AutoHide;
-            PostInit();
-            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-            this.Icon = Program.TrayLinkIcon;
-            this.StartPosition = FormStartPosition.Manual;
-            this.ShowInTaskbar = false;
-            this.TopMost = true;
-          //  this.Deactivate += (s, e) => this.Hide();
-            EventHandler deactivateHandler = (s, e) => this.Hide();
 
-            if (chkAutoHide.Checked)
-                this.Deactivate += deactivateHandler;
+            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Icon = Program.AppIcon;
+            StartPosition = FormStartPosition.Manual;
+            ShowInTaskbar = false;
+            TopMost = true;
+            KeyPreview = true;
+            _designHeight = Height;
 
+            label3.Text = "V " + VersionUtil.StripBuildMeta(VersionUtil.GetInstalledVersion());
+
+            chkAutoHide.Checked = AppSettings.Current.AutoHide;
             chkAutoHide.CheckedChanged += (s, e) =>
             {
-                if (chkAutoHide.Checked)
-                    this.Deactivate += deactivateHandler;
-                else
-                    this.Deactivate -= deactivateHandler;
-
-                Properties.Settings.Default.AutoHide = chkAutoHide.Checked;
-                Properties.Settings.Default.Save();
+                AppSettings.Current.AutoHide = chkAutoHide.Checked;
+                AppSettings.Save();
             };
-            actionPanel.AutoScroll = true;
-            actionPanel.HorizontalScroll.Enabled = false;
-            actionPanel.HorizontalScroll.Visible = false;
-            actionPanel.VerticalScroll.Enabled = true;
-            actionPanel.VerticalScroll.Visible = true;
-            actionPanel.AutoScrollMinSize = new Size(0, actionPanel.Height + 1);
-        }
 
-        private async Task PostInit()
-        {
+            Deactivate += OnDeactivateAutoHide;
+            FormClosing += OnFormClosing;
+            KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Escape)
+                {
+                    Hide();
+                    e.Handled = true;
+                }
+            };
+
+            actionPanel.DragEnter += ActionPanel_DragOver;
+            actionPanel.DragOver += ActionPanel_DragOver;
+            actionPanel.DragDrop += ActionPanel_DragDrop;
+            actionPanel.SizeChanged += (s, e) => UpdateCardWidths();
+
+            _reloadDebounce.Tick += (s, e) =>
+            {
+                _reloadDebounce.Stop();
+                ReloadFromDisk(force: false);
+            };
+
             try
             {
-                await Task.Delay(200);
-                inputReloadConfig(null, null);
+                AppPaths.EnsureDataDir();
+                _watcher = new FileSystemWatcher(AppPaths.DataDir, "actions.ini")
+                {
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime,
+                    SynchronizingObject = this
+                };
+                _watcher.Changed += OnConfigFileChanged;
+                _watcher.Created += OnConfigFileChanged;
+                _watcher.Renamed += OnConfigFileChanged;
+                _watcher.Deleted += OnConfigFileChanged;
+                _watcher.EnableRaisingEvents = true;
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Error during post initialization: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _watcher = null; // auto reload is a convenience, the Reload button still works
+            }
+
+            UpdateShellButton();
+            ReloadFromDisk(force: true);
+        }
+
+        // ------------------------------------------------------------------
+        // Popup behaviour
+        // ------------------------------------------------------------------
+
+        /// <summary>True right after the popup hid itself because it lost focus (see Program.TogglePopup).</summary>
+        public bool WasAutoHiddenJustNow => (DateTime.UtcNow - _autoHiddenAtUtc).TotalMilliseconds < 500;
+
+        /// <summary>Places the popup in the corner next to the taskbar of the screen the cursor is on.</summary>
+        public void PlaceNearTray(Point cursor)
+        {
+            var screen = Screen.FromPoint(cursor);
+            var wa = screen.WorkingArea;
+            var bounds = screen.Bounds;
+
+            Height = Math.Min(_designHeight, wa.Height - 20);
+
+            int x = wa.Left > bounds.Left ? wa.Left + 10 : wa.Right - Width - 10;  // taskbar left / otherwise right
+            int y = wa.Top > bounds.Top ? wa.Top + 10 : wa.Bottom - Height - 10;   // taskbar top / otherwise bottom
+
+            Location = new Point(Math.Max(wa.Left, x), Math.Max(wa.Top, y));
+        }
+
+        private void OnDeactivateAutoHide(object? sender, EventArgs e)
+        {
+            // Editor, message boxes and the updater are owned by the popup. They take the focus,
+            // but the popup must stay open behind them.
+            if (!chkAutoHide.Checked || _modalDepth > 0 || _dragging)
+                return;
+
+            _autoHiddenAtUtc = DateTime.UtcNow;
+            Hide();
+        }
+
+        private void OnFormClosing(object? sender, FormClosingEventArgs e)
+        {
+            // The X button only hides the popup. Exit is in the tray icon menu.
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                Hide();
             }
         }
 
-        private void inputReloadConfig(object sender, EventArgs e)
+        private T RunModal<T>(Func<T> action)
         {
-            string filePath = "actions.ini";
-            if (!File.Exists(filePath))
+            _modalDepth++;
+            try
             {
-                MessageBox.Show($"Configuration file '{filePath}' not found.\nGenerating new Config.", "Oops...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                createDefaultConfig();
+                return action();
+            }
+            finally
+            {
+                _modalDepth--;
+            }
+        }
+
+        private void ShowError(string title, string message) =>
+            RunModal(() => MessageBox.Show(this, message, title, MessageBoxButtons.OK, MessageBoxIcon.Error));
+
+        // ------------------------------------------------------------------
+        // Loading / saving
+        // ------------------------------------------------------------------
+
+        private void OnConfigFileChanged(object sender, FileSystemEventArgs e)
+        {
+            _reloadDebounce.Stop();
+            _reloadDebounce.Start();
+        }
+
+        private void ReloadFromDisk(bool force)
+        {
+            if (_dragging || _modalDepth > 0)
+            {
+                _reloadPending = true;
                 return;
             }
 
+            _reloadPending = false;
             try
             {
-                actions = LoadActionsFromIni(filePath);
-                populateActionCards();
+                if (!force && File.Exists(AppPaths.ActionsFile) &&
+                    ActionStore.ReadAllTextShared(AppPaths.ActionsFile) == _lastKnownText)
+                    return; // our own save, nothing new
+
+                _actions = ActionStore.Load(out var text);
+                _lastKnownText = text;
+                RequestRepopulate();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading configuration: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowError("Error", $"Error loading configuration:\n{ex.Message}");
             }
         }
 
-        private List<ActionConfig> LoadActionsFromIni(string filePath)
+        private void RunPendingReload()
         {
-            var actions = new List<ActionConfig>();
-            ActionConfig current = null;
+            if (_reloadPending && !_dragging && _modalDepth == 0)
+                ReloadFromDisk(force: false);
+        }
 
-            foreach (var line in File.ReadAllLines(filePath))
+        private void SaveAndRefresh()
+        {
+            try
             {
-                var trimmed = line.Trim();
+                MergeExternalAdditions();
+                _lastKnownText = ActionStore.Save(_actions);
+            }
+            catch (Exception ex)
+            {
+                ShowError("Error", $"Error saving configuration:\n{ex.Message}");
+            }
 
-                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith(";"))
+            _reloadPending = false;
+            RequestRepopulate();
+        }
+
+        /// <summary>
+        /// Entries added from outside (Explorer context menu) while the editor was open would be
+        /// overwritten by our save. Keep them by appending them to the in memory list.
+        /// </summary>
+        private void MergeExternalAdditions()
+        {
+            if (!File.Exists(AppPaths.ActionsFile))
+                return;
+
+            var diskText = ActionStore.ReadAllTextShared(AppPaths.ActionsFile);
+            if (diskText == _lastKnownText)
+                return;
+
+            var known = ActionStore.Parse(_lastKnownText);
+            foreach (var entry in ActionStore.Parse(diskText))
+            {
+                bool wasKnown = known.Any(k => SameEntry(k, entry));
+                bool isPresent = _actions.Any(a => SameEntry(a, entry));
+                if (!wasKnown && !isPresent)
+                    _actions.Add(entry);
+            }
+        }
+
+        private static bool SameEntry(ActionConfig a, ActionConfig b) =>
+            string.Equals(a.ActionName, b.ActionName, StringComparison.Ordinal) &&
+            string.Equals(a.ActionType, b.ActionType, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(a.PathOrUrl, b.PathOrUrl, StringComparison.OrdinalIgnoreCase);
+
+        // ------------------------------------------------------------------
+        // Cards
+        // ------------------------------------------------------------------
+
+        public bool CanReorder => string.IsNullOrWhiteSpace(searchBar.Text);
+
+        private int CardWidth =>
+            Math.Max(150, actionPanel.Width - SystemInformation.VerticalScrollBarWidth - 2 * SystemInformation.BorderSize.Width - 8);
+
+        /// <summary>
+        /// Rebuilding the cards disposes the button whose click started the change.
+        /// Doing that inside the click handler can crash, so it is always queued.
+        /// </summary>
+        private void RequestRepopulate()
+        {
+            if (_repopulateQueued)
+                return;
+            _repopulateQueued = true;
+
+            if (IsHandleCreated)
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    _repopulateQueued = false;
+                    PopulateCards();
+                }));
+            }
+            else
+            {
+                _repopulateQueued = false;
+                PopulateCards();
+            }
+        }
+
+        private void PopulateCards()
+        {
+            var filter = searchBar.Text.Trim();
+            int scrollY = -actionPanel.AutoScrollPosition.Y;
+
+            actionPanel.SuspendLayout();
+            var old = actionPanel.Controls.Cast<Control>().ToList();
+            actionPanel.Controls.Clear();
+            foreach (var c in old)
+                c.Dispose();
+
+            int width = CardWidth;
+            for (int i = 0; i < _actions.Count; i++)
+            {
+                var action = _actions[i];
+                if (!Matches(action, filter))
                     continue;
 
-                if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+                actionPanel.Controls.Add(new LinkItem(action, i + 1, this) { Width = width });
+            }
+            actionPanel.ResumeLayout();
+
+            actionPanel.AutoScrollPosition = new Point(0, scrollY);
+        }
+
+        private void UpdateCardWidths()
+        {
+            int width = CardWidth;
+            foreach (Control c in actionPanel.Controls)
+                c.Width = width;
+        }
+
+        private static bool Matches(ActionConfig a, string filter) =>
+            filter.Length == 0 ||
+            a.ActionName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+            a.ActionType.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+            a.PathOrUrl.Contains(filter, StringComparison.OrdinalIgnoreCase);
+
+        public void ExecuteAction(ActionConfig config) =>
+            RunModal(() => { ActionRunner.Execute(config, this); return 0; });
+
+        public void EditAction(ActionConfig config)
+        {
+            int index = _actions.IndexOf(config);
+            if (index < 0)
+                return;
+
+            using var form = new EditActionForm(config, index + 1, _actions.Count, isNew: false);
+            if (RunModal(() => form.ShowDialog(this)) != DialogResult.OK)
+            {
+                RunPendingReload();
+                return;
+            }
+
+            // The list may have been reloaded meanwhile, so look the entry up again.
+            index = _actions.IndexOf(config);
+            if (index < 0)
+                return;
+
+            _actions[index] = form.Result;
+            MoveItem(index, form.Position - 1);
+            SaveAndRefresh();
+        }
+
+        public void DeleteAction(ActionConfig config)
+        {
+            var answer = RunModal(() => MessageBox.Show(this, $"Delete '{config.ActionName}'?", "Confirm deletion",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question));
+            if (answer != DialogResult.Yes)
+                return;
+
+            // Remove exactly this entry, not every entry with the same name.
+            if (_actions.Remove(config))
+                SaveAndRefresh();
+        }
+
+        public void MoveAction(ActionConfig config, int delta)
+        {
+            int index = _actions.IndexOf(config);
+            if (index < 0)
+                return;
+
+            int target = Math.Clamp(index + delta, 0, _actions.Count - 1);
+            if (target == index)
+                return;
+
+            MoveItem(index, target);
+            SaveAndRefresh();
+        }
+
+        private void MoveItem(int from, int to)
+        {
+            to = Math.Clamp(to, 0, _actions.Count - 1);
+            if (from == to)
+                return;
+            var item = _actions[from];
+            _actions.RemoveAt(from);
+            _actions.Insert(to, item);
+        }
+
+        private void inputAddEntry(object? sender, EventArgs e)
+        {
+            var entry = new ActionConfig { ActionName = "", ActionType = ActionConfig.TypeUrl, PathOrUrl = "" };
+            int max = _actions.Count + 1;
+
+            using var form = new EditActionForm(entry, max, max, isNew: true);
+            if (RunModal(() => form.ShowDialog(this)) != DialogResult.OK)
+            {
+                RunPendingReload();
+                return;
+            }
+
+            _actions.Insert(Math.Clamp(form.Position - 1, 0, _actions.Count), form.Result);
+            SaveAndRefresh();
+        }
+
+        // ------------------------------------------------------------------
+        // Drag + drop (reorder cards, drop files/folders from Explorer)
+        // ------------------------------------------------------------------
+
+        private void ActionPanel_DragOver(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null)
+            {
+                e.Effect = DragDropEffects.None;
+                return;
+            }
+
+            if (e.Data.GetDataPresent(LinkItem.DragFormat) && e.Data.GetData(LinkItem.DragFormat) is LinkItem dragged)
+            {
+                _dragging = true;
+                e.Effect = DragDropEffects.Move;
+
+                var pt = actionPanel.PointToClient(new Point(e.X, e.Y));
+                AutoScrollWhileDragging(pt);
+
+                // Live preview: move the dragged card to the slot under the cursor.
+                if (actionPanel.GetChildAtPoint(pt) is LinkItem target && !ReferenceEquals(target, dragged))
+                    actionPanel.Controls.SetChildIndex(dragged, actionPanel.Controls.GetChildIndex(target));
+                return;
+            }
+
+            e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        private void AutoScrollWhileDragging(Point pt)
+        {
+            const int edge = 30;
+            const int step = 20;
+            int current = -actionPanel.AutoScrollPosition.Y;
+
+            if (pt.Y < edge)
+                actionPanel.AutoScrollPosition = new Point(0, Math.Max(0, current - step));
+            else if (pt.Y > actionPanel.ClientSize.Height - edge)
+                actionPanel.AutoScrollPosition = new Point(0, current + step);
+        }
+
+        private void ActionPanel_DragDrop(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null)
+                return;
+
+            if (e.Data.GetDataPresent(LinkItem.DragFormat))
+            {
+                e.Effect = DragDropEffects.Move; // the order is committed in OnCardDragFinished
+                return;
+            }
+
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
+            {
+                var entries = paths.Where(p => File.Exists(p) || Directory.Exists(p))
+                                   .Select(ActionConfig.FromPath)
+                                   .ToList();
+                if (entries.Count == 0)
+                    return;
+
+                _actions.AddRange(entries);
+                SaveAndRefresh();
+            }
+        }
+
+        public void OnCardDragFinished(LinkItem card, bool dropped)
+        {
+            // Read the new order now, apply it after the drag call stack has unwound.
+            var newOrder = actionPanel.Controls.OfType<LinkItem>().Select(c => c.Config).ToList();
+
+            BeginInvoke(new Action(() =>
+            {
+                _dragging = false;
+
+                bool changed = dropped &&
+                               newOrder.Count == _actions.Count &&
+                               !newOrder.SequenceEqual(_actions);
+
+                if (changed)
                 {
-                    if (current != null)
-                        actions.Add(current);
-                    current = new ActionConfig();
+                    _actions = newOrder;
+                    SaveAndRefresh();
                 }
-                else if (current != null && trimmed.Contains('='))
+                else
                 {
-                    var parts = trimmed.Split('=', 2);
-                    var key = parts[0].Trim().ToLower();
-                    var value = parts[1].Trim();
-
-                    switch (key)
-                    {
-                        case "actionname": current.ActionName = value; break;
-                        case "actiontype": current.ActionType = value; break;
-                        case "pathorurl": current.PathOrUrl = value; break;
-                    }
+                    PopulateCards(); // cancelled or dropped outside: restore the old order
+                    RunPendingReload();
                 }
-            }
-
-            if (current != null)
-                actions.Add(current);
-
-            return actions;
+            }));
         }
 
+        // ------------------------------------------------------------------
+        // Buttons
+        // ------------------------------------------------------------------
 
-        private void SaveActionsToIni(string filePath, List<ActionConfig> actions)
-        {
-            var sb = new StringBuilder();
+        private void inputReloadConfig(object? sender, EventArgs e) => ReloadFromDisk(force: true);
 
-            for (int i = 0; i < actions.Count; i++)
-            {
-                sb.AppendLine($"[Action{i + 1}]");
-                sb.AppendLine($"ActionName={actions[i].ActionName}");
-                sb.AppendLine($"ActionType={actions[i].ActionType}");
-                sb.AppendLine($"PathOrUrl={actions[i].PathOrUrl}");
-                sb.AppendLine();
-            }
-
-            File.WriteAllText(filePath, sb.ToString());
-            machineReload();
-        }
-        private void populateActionCards()
-        {
-            actionPanel.Controls.Clear();
-            foreach (var action in actions)
-            {
-                var card = new LinkItem(action, DeleteAction, EditAction, MoveActionUp, MoveActionDown);
-                card.Width = actionPanel.Width - (actionPanel.VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0) - 10;
-                actionPanel.Controls.Add(card);
-            }
-        }
-
-        private void EditAction(ActionConfig configToEdit)
-        {
-
-            var originalConfig = new ActionConfig
-            {
-                ActionName = configToEdit.ActionName,
-                ActionType = configToEdit.ActionType,
-                PathOrUrl = configToEdit.PathOrUrl
-            };
-
-            using (var editForm = new EditActionForm(originalConfig))
-            {
-                if (editForm.ShowDialog() == DialogResult.OK)
-                {
-                    int index = actions.FindIndex(a => a.ActionName == configToEdit.ActionName);
-
-                    if (index != -1)
-                    {
-                        actions[index].ActionName = editForm.ActionName;
-                        actions[index].PathOrUrl = editForm.PathOrUrl;
-
-                        SaveActionsToIni("actions.ini", actions);
-                    }
-                }
-            }
-        }
-        private void DeleteAction(ActionConfig configToDelete)
-        {
-            var filePath = "actions.ini";
-            actions = actions.Where(a => a.ActionName != configToDelete.ActionName).ToList();
-            SaveActionsToIni(filePath, actions);
-        }
-        private async Task machineReload()
-        {
-
-            await Task.Delay(250);
-            inputReloadConfig(null, null);
-            CloseAllEditActionForms();
-        }
-
-        private void CloseAllEditActionForms()
-        {
-
-            List<Form> formsToClose = new List<Form>();
-
-            foreach (Form openForm in Application.OpenForms)
-            {
-
-                if (openForm is EditActionForm)
-                {
-                    formsToClose.Add(openForm);
-                }
-            }
-
-            foreach (Form form in formsToClose)
-            {
-
-                if (form.DialogResult == DialogResult.None)
-                {
-                    form.DialogResult = DialogResult.Cancel;
-                }
-
-                form.Close();
-            }
-        }
-        private ActionConfig createDefaultConfig()
+        private void inputOpenConfig(object? sender, EventArgs e)
         {
             try
             {
-                var defaultAction = new ActionConfig
+                if (!File.Exists(AppPaths.ActionsFile))
+                    _lastKnownText = ActionStore.Save(_actions);
+
+                try
                 {
-                    ActionName = "Open Notepad",
-                    ActionType = "FILE",
-                    PathOrUrl = "notepad.exe"
-                };
-
-                actions = new List<ActionConfig> { defaultAction };
-                SaveActionsToIni("actions.ini", actions);
-                return defaultAction;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error creating default config: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-        }
-
-        private void inputOpenConfig(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo("actions.ini") { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error opening configuration file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void inputSearchQuery(object sender, EventArgs e)
-        {
-            FilteredDeviceCards(searchBar.Text);
-        }
-
-        private void FilteredDeviceCards(string searchTerm)
-        {
-            searchTerm = searchTerm.Trim().ToLower();
-            actionPanel.Controls.Clear();
-
-            var filteredActions = actions.Where(s =>
-                string.IsNullOrWhiteSpace(searchTerm) ||
-                s.ActionName.ToLower().Contains(searchTerm) ||
-                s.ActionType.ToLower().Contains(searchTerm) ||
-                s.PathOrUrl.ToLower().Contains(searchTerm)).ToList();
-
-            foreach (var action in filteredActions)
-            {
-                var deviceCard = new LinkItem(action, DeleteAction, EditAction, MoveActionUp, MoveActionDown);
-                actionPanel.Controls.Add(deviceCard);
-            }
-        }
-
-        private void inputUpdate(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            string url = "https://rehoga-interactive.com/traylink/";
-            try
-            {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error opening update link: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void inputShellInteg(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
+                    Process.Start(new ProcessStartInfo(AppPaths.ActionsFile) { UseShellExecute = true });
+                }
+                catch
                 {
-                    FileName = "Setup.bat",
-                    UseShellExecute = true,
-                    Verb = "runas"
-                });
+                    // No program associated with .ini
+                    Process.Start(new ProcessStartInfo("notepad.exe", $"\"{AppPaths.ActionsFile}\"") { UseShellExecute = true });
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Shell integration failed:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowError("Error", $"Error opening configuration file:\n{ex.Message}");
             }
         }
 
+        private void inputSearchQuery(object? sender, EventArgs e) => PopulateCards();
 
-        private void MoveActionUp(ActionConfig config)
+        private async void inputUpdate(object? sender, LinkLabelLinkClickedEventArgs e) => await RunUpdateCheckAsync();
+
+        public async Task RunUpdateCheckAsync()
         {
-            int index = actions.IndexOf(config);
-            if (index > 0)
+            if (_updateRunning)
+                return;
+
+            _updateRunning = true;
+            _modalDepth++;
+            try
             {
-                actions.RemoveAt(index);
-                actions.Insert(index - 1, config);
-                SaveActionsToIni("actions.ini", actions);
+                await Updater.Update.CheckAndMaybeUpdateAsync(this, CancellationToken.None, showNoUpdateMessage: true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Update failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _modalDepth--;
+                _updateRunning = false;
             }
         }
 
-        private void MoveActionDown(ActionConfig config)
+        private void inputShellInteg(object? sender, EventArgs e)
         {
-            int index = actions.IndexOf(config);
-            if (index < actions.Count - 1)
+            try
             {
-                actions.RemoveAt(index);
-                actions.Insert(index + 1, config);
-                SaveActionsToIni("actions.ini", actions);
+                if (ShellIntegration.IsRegistered)
+                {
+                    ShellIntegration.Unregister();
+                    RunModal(() => MessageBox.Show(this, "\"Add to TrayLink\" was removed from the Explorer context menu.",
+                        "Shell Integration", MessageBoxButtons.OK, MessageBoxIcon.Information));
+                }
+                else
+                {
+                    ShellIntegration.Register();
+                    RunModal(() => MessageBox.Show(this, "You can now right click files or folders and choose \"Add to TrayLink\".\n\n" +
+                        "Windows 11: the entry is under \"Show more options\".",
+                        "Shell Integration", MessageBoxButtons.OK, MessageBoxIcon.Information));
+                }
             }
+            catch (Exception ex)
+            {
+                ShowError("Shell Integration", $"Shell integration failed:\n{ex.Message}");
+            }
+
+            UpdateShellButton();
+        }
+
+        private void UpdateShellButton() =>
+            button1.Text = ShellIntegration.IsRegistered
+                ? "Shell Integration: remove \"Add to TrayLink\""
+                : "Shell Integration: add \"Add to TrayLink\"";
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _watcher?.Dispose();
+                _reloadDebounce.Dispose();
+                components?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

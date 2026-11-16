@@ -7,18 +7,7 @@
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        // Dispose(bool) lives in TrayPopupForm.cs (also disposes the file watcher).
 
         #region Windows Form Designer generated code
 
@@ -30,7 +19,6 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrayPopupForm));
-            TrayIcon = new NotifyIcon(components);
             actionPanel = new FlowLayoutPanel();
             searchBar = new TextBox();
             label1 = new Label();
@@ -43,17 +31,19 @@
             linkLabel1 = new LinkLabel();
             button1 = new Button();
             chkAutoHide = new CheckBox();
+            buttonAdd = new Button();
+            toolTip = new ToolTip(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
             // 
-            // TrayIcon
-            // 
-            TrayIcon.Text = "TrayLink";
-            TrayIcon.Visible = true;
-            // 
             // actionPanel
             // 
+            actionPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            actionPanel.AllowDrop = true;
+            actionPanel.AutoScroll = true;
+            actionPanel.FlowDirection = FlowDirection.TopDown;
+            actionPanel.WrapContents = false;
             actionPanel.BackColor = SystemColors.ButtonShadow;
             actionPanel.BorderStyle = BorderStyle.FixedSingle;
             actionPanel.Location = new Point(11, 263);
@@ -66,7 +56,7 @@
             searchBar.BackColor = SystemColors.ScrollBar;
             searchBar.Location = new Point(11, 212);
             searchBar.Name = "searchBar";
-            searchBar.Size = new Size(298, 27);
+            searchBar.Size = new Size(254, 27);
             searchBar.TabIndex = 1;
             searchBar.TextChanged += inputSearchQuery;
             // 
@@ -142,7 +132,7 @@
             label3.Name = "label3";
             label3.Size = new Size(52, 20);
             label3.TabIndex = 8;
-            label3.Text = "V 1.4.2";
+            label3.Text = "V";
             // 
             // linkLabel1
             // 
@@ -182,12 +172,27 @@
             chkAutoHide.Text = "Close on \r\nfocus loss";
             chkAutoHide.UseVisualStyleBackColor = true;
             // 
+            // buttonAdd
+            // 
+            buttonAdd.BackColor = SystemColors.ControlDark;
+            buttonAdd.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
+            buttonAdd.ForeColor = SystemColors.ActiveCaptionText;
+            buttonAdd.Location = new Point(269, 211);
+            buttonAdd.Name = "buttonAdd";
+            buttonAdd.Size = new Size(40, 29);
+            buttonAdd.TabIndex = 12;
+            buttonAdd.Text = "+";
+            buttonAdd.UseVisualStyleBackColor = false;
+            buttonAdd.Click += inputAddEntry;
+            toolTip.SetToolTip(buttonAdd, "Add entry (or drop files/folders into the list)");
+            // 
             // TrayPopupForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(322, 805);
+            Controls.Add(buttonAdd);
             Controls.Add(chkAutoHide);
             Controls.Add(button1);
             Controls.Add(linkLabel1);
@@ -211,7 +216,6 @@
 
         #endregion
 
-        private NotifyIcon TrayIcon;
         private FlowLayoutPanel actionPanel;
         private TextBox searchBar;
         private Label label1;
@@ -224,5 +228,7 @@
         private LinkLabel linkLabel1;
         private Button button1;
         private CheckBox chkAutoHide;
+        private Button buttonAdd;
+        private ToolTip toolTip;
     }
 }
