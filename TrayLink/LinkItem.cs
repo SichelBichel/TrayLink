@@ -1,103 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace TrayLink
+﻿namespace TrayLink
 {
+    /// <summary>What a card needs from the list that hosts it.</summary>
+    public interface ILinkItemHost
+    {
+        void ExecuteAction(ActionConfig config);
+        void EditAction(ActionConfig config);
+        void DeleteAction(ActionConfig config);
+        void MoveAction(ActionConfig config, int delta);
+
+        /// <summary>False while the search filter is active (order of a filtered list is ambiguous).</summary>
+        bool CanReorder { get; }
+
+        void OnCardDragFinished(LinkItem card, bool dropped);
+    }
+
     public partial class LinkItem : UserControl
     {
-        private ActionConfig _config;
-        private Action<ActionConfig> _onDelete;
-        private Action<ActionConfig> _onEdit;
-        private Action<ActionConfig> _onMoveUp;
-        private Action<ActionConfig> _onMoveDown;
-        public LinkItem(ActionConfig config, Action<ActionConfig> onDelete, Action<ActionConfig> onEdit, Action<ActionConfig> onMoveUp, Action<ActionConfig> onMoveDown)
+        public const string DragFormat = "TrayLink.LinkItem";
+
+        private readonly ILinkItemHost _host;
+        private readonly Color _normalBackColor;
+        private bool _mouseDown;
+        private Point _mouseDownScreenPos;
+
+        public ActionConfig Config { get; }
+
+        public LinkItem(ActionConfig config, int position, ILinkItemHost host)
         {
             InitializeComponent();
-            _config = config;
-            _onDelete = onDelete;
-            _onEdit = onEdit;
-            _onMoveUp = onMoveUp;
-            _onMoveDown = onMoveDown;
-            ApplyConfig();
+            Config = config;
+            _host = host;
+            _normalBackColor = BackColor;
+
+            labelPos.Text = "#" + position;
+            labelType.Text = config.ActionType.ToUpperInvariant();
+            labelName.Text = config.ActionName;
+
+            var tip = $"{config.ActionName}\n{config.PathOrUrl}";
+            toolTip.SetToolTip(this, tip);
+            toolTip.SetToolTip(labelName, tip);
+            toolTip.SetToolTip(labelType, tip);
+
+            // Drag + drop: grab the card anywhere except on the buttons.
+            foreach (var c in new Control[] { this, labelName, labelType, labelPos })
+            {
+                c.MouseDown += Card_MouseDown;
+                c.MouseMove += Card_MouseMove;
+                c.MouseUp += Card_MouseUp;
+            }
+
+            UpdateReorderState();
         }
 
-        private void ApplyConfig()
+        /// <summary>Shows the move cursor and enables the arrow buttons only when reordering is possible.</summary>
+        public void UpdateReorderState()
         {
-            labelType.Text = _config.ActionType.ToUpper();
-            labelName.Text = _config.ActionName;
-            buttonExecute.Click += (s, e) => ExecuteAction(_config);
-            buttonEdit.Click += inputEditEntry;
-
-            //buttonUp.Click += ClickMoveUp;
-            //buttonDown.Click += clickMoveDown;
-
-           // buttonDelete.Click += inputDeleteEntry;
+            bool canReorder = _host.CanReorder;
+            Cursor = canReorder ? Cursors.SizeAll : Cursors.Default;
+            buttonUp.Enabled = canReorder;
+            buttonDown.Enabled = canReorder;
         }
 
-        private void ExecuteAction(ActionConfig config)
+        private void Card_MouseDown(object? sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left)
+                return;
+            _mouseDown = true;
+            _mouseDownScreenPos = Control.MousePosition;
+        }
+
+        private void Card_MouseUp(object? sender, MouseEventArgs e) => _mouseDown = false;
+
+        private void Card_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (!_mouseDown || e.Button != MouseButtons.Left || !_host.CanReorder)
+                return;
+
+            var now = Control.MousePosition;
+            var dragSize = SystemInformation.DragSize;
+            if (Math.Abs(now.X - _mouseDownScreenPos.X) < dragSize.Width &&
+                Math.Abs(now.Y - _mouseDownScreenPos.Y) < dragSize.Height)
+                return;
+
+            _mouseDown = false;
+            BeginCardDrag();
+        }
+
+        private void BeginCardDrag()
+        {
+            DragDropEffects result = DragDropEffects.None;
+            BackColor = SystemColors.GradientInactiveCaption;
             try
             {
-                if (config.ActionType.Equals("URL", StringComparison.OrdinalIgnoreCase))
-                {
-                    Process.Start(new ProcessStartInfo(config.PathOrUrl) { UseShellExecute = true });
-                }
-                else if (config.ActionType.Equals("FILE", StringComparison.OrdinalIgnoreCase))
-                {
-                    Process.Start(new ProcessStartInfo(config.PathOrUrl) { UseShellExecute = true });
-                }
-                else if (config.ActionType.Equals("PATH", StringComparison.OrdinalIgnoreCase))
-                {
-                    Process.Start("explorer.exe", config.PathOrUrl);
-                }
-                else
-                {
-                    MessageBox.Show($"Unknown action type: {config.ActionType}", "Action Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                var data = new DataObject();
+                data.SetData(DragFormat, this);
+                result = DoDragDrop(data, DragDropEffects.Move);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show($"Error executing action: {ex.Message}", "Execution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!IsDisposed)
+                    BackColor = _normalBackColor;
             }
+
+            _host.OnCardDragFinished(this, result == DragDropEffects.Move);
         }
 
-        private void inputExecute(object sender, EventArgs e)
-        {
+        private void inputExecute(object sender, EventArgs e) => _host.ExecuteAction(Config);
 
-        }
+        private void inputEditEntry(object sender, EventArgs e) => _host.EditAction(Config);
 
-        private void inputDeleteEntry(object sender, EventArgs e)
-        {
-            var result = MessageBox.Show($"Delete '{_config.ActionName}'?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
-            {
-                _onDelete?.Invoke(_config);
-            }
-        }
+        private void inputDeleteEntry(object sender, EventArgs e) => _host.DeleteAction(Config);
 
-        private void inputEditEntry(object sender, EventArgs e)
-        {
-            _onEdit?.Invoke(_config);
-        }
+        private void ClickMoveUp(object sender, EventArgs e) => _host.MoveAction(Config, -1);
 
-        private void button2_Click(object sender, EventArgs e){}
-
-        private void ClickMoveUp(object sender, EventArgs e)
-        {
-            _onMoveUp?.Invoke(_config);
-        }
-
-        private void clickMoveDown(object sender, EventArgs e)
-        {
-            _onMoveDown?.Invoke(_config);
-        }
+        private void clickMoveDown(object sender, EventArgs e) => _host.MoveAction(Config, +1);
     }
 }

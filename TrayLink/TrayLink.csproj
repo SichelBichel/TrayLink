@@ -2,13 +2,51 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>TrayLink.ico</ApplicationIcon>
     <PackageIcon>TrayLink.png</PackageIcon>
+    <Product>TrayLink</Product>
+    <Company>ReHoGa Interactive</Company>
+    <PackageReleaseNotes>1.5.0</PackageReleaseNotes>
+    <AssemblyVersion>1.5.0</AssemblyVersion>
+    <FileVersion>1.5.0</FileVersion>
+    <InformationalVersion>1.5.0</InformationalVersion>
+    <BuildUpdater>true</BuildUpdater>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <SourceRevisionId></SourceRevisionId>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <!-- ===================== -->
+  <!--   Updater on BUILD    -->
+  <!-- ===================== -->
+  <Target Name="PublishAndCopyUpdater_OnBuild" BeforeTargets="Build" Condition="'$(BuildUpdater)' == 'true'">
+    <PropertyGroup>
+      <_UpdaterBuildPublishDir>$(OutDir)updater_pub</_UpdaterBuildPublishDir>
+    </PropertyGroup>
+    <Exec Command="dotnet publish ..\Updater\Updater.csproj -c $(Configuration) -r win-x64 --self-contained false /p:PublishSingleFile=true /p:PublishTrimmed=false -o &quot;$(_UpdaterBuildPublishDir)&quot;" />
+    <Copy SourceFiles="$(_UpdaterBuildPublishDir)\Updater.exe" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- ===================== -->
+  <!--   Updater on PUBLISH  -->
+  <!-- ===================== -->
+  <Target Name="PublishAndCopyUpdater_OnPublish" BeforeTargets="Publish" Condition="'$(BuildUpdater)' == 'true'">
+    <PropertyGroup>
+      <_UpdaterPublishDir>$(PublishDir)updater_pub</_UpdaterPublishDir>
+    </PropertyGroup>
+    <Exec Command="dotnet publish ..\Updater\Updater.csproj -c $(Configuration) -r win-x64 --self-contained false /p:PublishSingleFile=true /p:PublishTrimmed=false -o &quot;$(_UpdaterPublishDir)&quot;" />
+    <Copy SourceFiles="$(_UpdaterPublishDir)\Updater.exe" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
 
   <ItemGroup>
     <None Remove="Resources\TrayLink.ico" />
@@ -30,7 +68,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Tomlyn" Version="0.19.0" />
+    <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,11 +77,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -51,13 +84,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 
 </Project>
