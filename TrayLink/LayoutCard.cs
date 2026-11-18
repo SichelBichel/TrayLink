@@ -20,6 +20,7 @@ namespace TrayLink
         public LayoutCard(DesktopLayout layout, bool restoredAtStart, ILayoutCardHost host)
         {
             InitializeComponent();
+            Theme.ApplyContent(this);
             Snapshot = layout;
             _host = host;
 
@@ -33,7 +34,7 @@ namespace TrayLink
             {
                 labelAuto.Text = "Saved " + layout.SavedAt.ToString("dd.MM.yyyy HH:mm");
                 labelAuto.Font = labelInfo.Font;
-                labelAuto.ForeColor = SystemColors.GrayText;
+                labelAuto.ForeColor = Theme.MutedText;
             }
 
             var apps = layout.Windows.Where(w => w.Include).Select(w => w.AppName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();

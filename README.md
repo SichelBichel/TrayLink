@@ -4,7 +4,7 @@ Small tray tool by ReHoGa Interactive: left click on the tray icon opens a list 
 
 ## Usage
 
-The popup has two tabs: **Links** (the cards that start URLs, files and folders) and **Desktops** (saved desktop layouts). "Options" in the header holds: Add link, Open / Reload `actions.ini`, Close on focus loss, Explorer context menu, Start with Windows, Check for updates.
+The popup has two tabs: **Links** (the cards that start URLs, files and folders) and **Desktops** (saved desktop layouts). "Options" in the header holds: Add link, Open / Reload `actions.ini`, Close on focus loss, Explorer context menu, Start with Windows, Appearance (like Windows, light, dark; applied after a restart of TrayLink), Check for updates.
 
 - **Left click** on the tray icon: open or close the popup.
 - **Right click** on the tray icon: Open, Start with Windows, Check for updates, Exit.
@@ -45,7 +45,7 @@ Everything is stored per user in `%APPDATA%\TrayLink`:
 | File | Content |
 |---|---|
 | `actions.ini` | the entries, the section order is the card order |
-| `settings.json` | "Close on focus loss", layout restored at Windows start |
+| `settings.json` | "Close on focus loss", appearance, last tab, layout restored at Windows start |
 | `layouts\*.json` | the desktop layouts |
 
 An `actions.ini` from older versions (next to the exe) is copied there on first start. Changes to `actions.ini` from outside (editor, context menu) are picked up automatically.

@@ -8,6 +8,7 @@ namespace TrayLink
         public NamePromptForm(string title, string prompt, string initial)
         {
             InitializeComponent();
+            Theme.ApplyContent(this);
             Text = title;
             labelPrompt.Text = prompt;
             textName.Text = initial;

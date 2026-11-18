@@ -47,6 +47,9 @@ namespace TrayLink
                 lblLogo.Visible = false; // logo is decoration only
             }
 
+            Theme.ApplyRenderer(menuAppearance.DropDown);
+            Theme.ApplyContent(this);
+
             LayoutUi.LayoutsChanged += OnLayoutsChanged;
             SelectTab(AppSettings.Current.PopupTab == "Desktops");
 
@@ -628,6 +631,25 @@ namespace TrayLink
             menuAutoHide.Checked = AppSettings.Current.AutoHide;
             menuShellIntegration.Checked = ShellIntegration.IsRegistered;
             menuStartWithWindows.Checked = Autostart.IsEnabled;
+            var mode = ColorModeSupport.Current;
+            menuThemeSystem.Checked = mode == ColorModeSupport.System;
+            menuThemeLight.Checked = mode == ColorModeSupport.Light;
+            menuThemeDark.Checked = mode == ColorModeSupport.Dark;
+        }
+
+        private void menuTheme_Click(object? sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem { Tag: string mode } || mode == ColorModeSupport.Current)
+                return;
+
+            AppSettings.Current.ColorMode = mode;
+            AppSettings.Save();
+
+            var answer = RunModal(() => MessageBox.Show(this,
+                "The appearance changes when TrayLink starts again.\n\nRestart TrayLink now?",
+                "Appearance", MessageBoxButtons.YesNo, MessageBoxIcon.Question));
+            if (answer == DialogResult.Yes)
+                Program.Restart();
         }
 
         private void menuAutoHide_Click(object? sender, EventArgs e)

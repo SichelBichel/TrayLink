@@ -54,6 +54,8 @@ namespace TrayLink
 
             AppIcon = LoadIconFromResources("TrayLink.Resources.TrayLink.ico");
             AppSettings.Load();
+            // Before the first window: Windows Forms switches its colour mode only once per process.
+            ColorModeSupport.Apply(AppSettings.Current.ColorMode);
             ShellIntegration.RepairIfStale();
             Autostart.RepairIfStale();
 
@@ -121,6 +123,22 @@ namespace TrayLink
                     try { ShellIntegration.Unregister(); return 0; }
                     catch (Exception ex) { MessageBox.Show(ex.Message, "TrayLink", MessageBoxButtons.OK, MessageBoxIcon.Error); return 2; }
 
+                case "--wait-for":
+                    // Restart after a change of the appearance: the old instance must be gone first (single instance).
+                    if (args.Length > 1 && int.TryParse(args[1], out int pid))
+                    {
+                        try
+                        {
+                            using var old = System.Diagnostics.Process.GetProcessById(pid);
+                            old.WaitForExit(15000);
+                        }
+                        catch
+                        {
+                            // already gone
+                        }
+                    }
+                    return null;
+
                 default:
                     // Unknown arguments (for example from an updater restart): start normally.
                     return null;
@@ -167,7 +185,8 @@ namespace TrayLink
 
         private static ToolStripMenuItem BuildLayoutMenu()
         {
-            var root = new ToolStripMenuItem("Desktop layouts");
+            // Opens to the left: TrayLink lives in the lower right corner, next to the clock.
+            var root = new ToolStripMenuItem("Desktop layouts") { DropDownDirection = ToolStripDropDownDirection.Left };
             Theme.ApplyRenderer(root.DropDown);
             // Filled when it opens, so it always lists the saved layouts.
             root.DropDownItems.Add(new ToolStripMenuItem("(loading)") { Enabled = false });
@@ -214,6 +233,24 @@ namespace TrayLink
                 _layoutManager.BringToFront();
                 _layoutManager.Activate();
             }
+        }
+
+        /// <summary>Starts a new TrayLink that waits for this one, then ends this one (appearance change).</summary>
+        public static void Restart()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(AppPaths.ExePath, $"--wait-for {Environment.ProcessId}")
+                {
+                    UseShellExecute = false
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("TrayLink could not restart itself:\n" + ex.Message + "\n\nPlease start it again by hand.", "TrayLink",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            Application.Exit();
         }
 
         /// <summary>Balloon of the tray icon (layout saved / restored).</summary>

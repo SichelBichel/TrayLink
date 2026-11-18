@@ -33,6 +33,10 @@
             menuAutoHide = new ToolStripMenuItem();
             menuShellIntegration = new ToolStripMenuItem();
             menuStartWithWindows = new ToolStripMenuItem();
+            menuAppearance = new ToolStripMenuItem();
+            menuThemeSystem = new ToolStripMenuItem();
+            menuThemeLight = new ToolStripMenuItem();
+            menuThemeDark = new ToolStripMenuItem();
             menuOptionsSep3 = new ToolStripSeparator();
             menuCheckUpdates = new ToolStripMenuItem();
             stripTabs = new ToolStrip();
@@ -110,7 +114,7 @@
             lblVersion.Name = "lblVersion";
             lblVersion.Size = new Size(46, 19);
             lblVersion.TabIndex = 2;
-            lblVersion.Text = "V 1.7.0";
+            lblVersion.Text = "V 1.7.1";
             //
             // stripHeader
             //
@@ -128,7 +132,8 @@
             // ddOptions
             //
             ddOptions.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddOptions.DropDownItems.AddRange(new ToolStripItem[] { menuAddEntry, menuOptionsSep1, menuOpenConfig, menuReloadConfig, menuOptionsSep2, menuAutoHide, menuShellIntegration, menuStartWithWindows, menuOptionsSep3, menuCheckUpdates });
+            ddOptions.DropDownDirection = ToolStripDropDownDirection.BelowLeft;
+            ddOptions.DropDownItems.AddRange(new ToolStripItem[] { menuAddEntry, menuOptionsSep1, menuOpenConfig, menuReloadConfig, menuOptionsSep2, menuAutoHide, menuShellIntegration, menuStartWithWindows, menuAppearance, menuOptionsSep3, menuCheckUpdates });
             ddOptions.ForeColor = Color.FromArgb(238, 242, 250);
             ddOptions.Name = "ddOptions";
             ddOptions.Padding = new Padding(6, 0, 6, 0);
@@ -187,6 +192,38 @@
             menuStartWithWindows.Size = new Size(330, 26);
             menuStartWithWindows.Text = "Start with Windows";
             menuStartWithWindows.Click += menuStartWithWindows_Click;
+            //
+            // menuAppearance
+            //
+            menuAppearance.DropDownDirection = ToolStripDropDownDirection.Left;
+            menuAppearance.DropDownItems.AddRange(new ToolStripItem[] { menuThemeSystem, menuThemeLight, menuThemeDark });
+            menuAppearance.Name = "menuAppearance";
+            menuAppearance.Size = new Size(330, 26);
+            menuAppearance.Text = "Appearance";
+            //
+            // menuThemeSystem
+            //
+            menuThemeSystem.Name = "menuThemeSystem";
+            menuThemeSystem.Size = new Size(230, 26);
+            menuThemeSystem.Tag = "System";
+            menuThemeSystem.Text = "Like Windows";
+            menuThemeSystem.Click += menuTheme_Click;
+            //
+            // menuThemeLight
+            //
+            menuThemeLight.Name = "menuThemeLight";
+            menuThemeLight.Size = new Size(230, 26);
+            menuThemeLight.Tag = "Light";
+            menuThemeLight.Text = "Light";
+            menuThemeLight.Click += menuTheme_Click;
+            //
+            // menuThemeDark
+            //
+            menuThemeDark.Name = "menuThemeDark";
+            menuThemeDark.Size = new Size(230, 26);
+            menuThemeDark.Tag = "Dark";
+            menuThemeDark.Text = "Dark";
+            menuThemeDark.Click += menuTheme_Click;
             //
             // menuOptionsSep3
             //
@@ -488,6 +525,10 @@
         private ToolStripMenuItem menuAutoHide;
         private ToolStripMenuItem menuShellIntegration;
         private ToolStripMenuItem menuStartWithWindows;
+        private ToolStripMenuItem menuAppearance;
+        private ToolStripMenuItem menuThemeSystem;
+        private ToolStripMenuItem menuThemeLight;
+        private ToolStripMenuItem menuThemeDark;
         private ToolStripSeparator menuOptionsSep3;
         private ToolStripMenuItem menuCheckUpdates;
         private ToolStrip stripTabs;

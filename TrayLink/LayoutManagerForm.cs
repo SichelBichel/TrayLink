@@ -22,6 +22,7 @@ namespace TrayLink
             _selectOnLoad = select;
             grid.DefaultCellStyle.SelectionBackColor = Theme.Selected;
             grid.DefaultCellStyle.SelectionForeColor = Color.White;
+            Theme.ApplyContent(this);
             Icon = Program.AppIcon;
             listLayouts.DisplayMember = nameof(DesktopLayout.Name);
 
@@ -120,7 +121,7 @@ namespace TrayLink
 
                     if (!w.CanStart)
                     {
-                        row.DefaultCellStyle.ForeColor = SystemColors.GrayText;
+                        row.DefaultCellStyle.ForeColor = Theme.MutedText;
                         row.Cells[colStart.Index].ReadOnly = true;
                         row.Cells[colDelay.Index].ReadOnly = true;
                     }

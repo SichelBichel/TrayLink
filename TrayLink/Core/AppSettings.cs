@@ -10,6 +10,9 @@ namespace TrayLink.Core
     {
         public bool AutoHide { get; set; } = true;
 
+        /// <summary>Appearance: "System" (follows Windows), "Light" or "Dark". Applied at the start of TrayLink.</summary>
+        public string ColorMode { get; set; } = "System";
+
         /// <summary>Tab of the popup that was open last ("Links" or "Desktops").</summary>
         public string PopupTab { get; set; } = "Links";
 

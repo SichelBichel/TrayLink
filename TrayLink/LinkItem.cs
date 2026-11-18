@@ -28,6 +28,7 @@
         public LinkItem(ActionConfig config, int position, ILinkItemHost host)
         {
             InitializeComponent();
+            Theme.ApplyContent(this);
             Config = config;
             _host = host;
             _normalBackColor = BackColor;

@@ -15,6 +15,7 @@
         public EditActionForm(ActionConfig source, int position, int maxPosition, bool isNew)
         {
             InitializeComponent();
+            Theme.ApplyContent(this);
 
             Result = source.Clone();
             Text = isNew ? "Add link" : "Edit link";
