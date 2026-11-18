@@ -58,7 +58,12 @@ namespace TrayLink
             buttonOk.Size = new Size(94, 32);
             buttonOk.TabIndex = 2;
             buttonOk.Text = "OK";
-            buttonOk.UseVisualStyleBackColor = true;
+            buttonOk.BackColor = Color.FromArgb(0, 52, 160);
+            buttonOk.FlatAppearance.BorderSize = 0;
+            buttonOk.FlatAppearance.MouseOverBackColor = Color.FromArgb(24, 118, 232);
+            buttonOk.FlatStyle = FlatStyle.Flat;
+            buttonOk.ForeColor = Color.White;
+            buttonOk.UseVisualStyleBackColor = false;
             //
             // buttonCancel
             //
@@ -75,6 +80,7 @@ namespace TrayLink
             AcceptButton = buttonOk;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(236, 239, 244);
             CancelButton = buttonCancel;
             ClientSize = new Size(400, 126);
             Controls.Add(buttonCancel);

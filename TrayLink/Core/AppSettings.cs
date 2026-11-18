@@ -10,6 +10,9 @@ namespace TrayLink.Core
     {
         public bool AutoHide { get; set; } = true;
 
+        /// <summary>Tab of the popup that was open last ("Links" or "Desktops").</summary>
+        public string PopupTab { get; set; } = "Links";
+
         /// <summary>Desktop layout restored once per Windows sign in (null = off).</summary>
         public string? AutoRestoreLayout { get; set; }
 

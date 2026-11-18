@@ -51,14 +51,63 @@ namespace TrayLink
             buttonRestore = new Button();
             buttonClose = new Button();
             toolTip = new ToolTip(components);
+            pnlHeader = new Panel();
+            lblHeaderTitle = new Label();
+            lblHeaderSubtitle = new Label();
+            pnlAccent = new Panel();
             ((System.ComponentModel.ISupportInitialize)grid).BeginInit();
+            pnlHeader.SuspendLayout();
             SuspendLayout();
+            //
+            // pnlHeader
+            //
+            pnlHeader.BackColor = Color.FromArgb(20, 28, 48);
+            pnlHeader.Controls.Add(lblHeaderSubtitle);
+            pnlHeader.Controls.Add(lblHeaderTitle);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 0);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(1000, 64);
+            pnlHeader.TabIndex = 20;
+            //
+            // lblHeaderTitle
+            //
+            lblHeaderTitle.AutoSize = true;
+            lblHeaderTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblHeaderTitle.ForeColor = Color.FromArgb(238, 242, 250);
+            lblHeaderTitle.Location = new Point(14, 6);
+            lblHeaderTitle.Name = "lblHeaderTitle";
+            lblHeaderTitle.Size = new Size(193, 32);
+            lblHeaderTitle.TabIndex = 0;
+            lblHeaderTitle.Text = "Desktop layouts";
+            //
+            // lblHeaderSubtitle
+            //
+            lblHeaderSubtitle.AutoSize = true;
+            lblHeaderSubtitle.Font = new Font("Segoe UI", 8F);
+            lblHeaderSubtitle.ForeColor = Color.FromArgb(158, 172, 198);
+            lblHeaderSubtitle.Location = new Point(17, 39);
+            lblHeaderSubtitle.Name = "lblHeaderSubtitle";
+            lblHeaderSubtitle.Size = new Size(330, 19);
+            lblHeaderSubtitle.TabIndex = 1;
+            lblHeaderSubtitle.Text = "Open windows with monitor and position, restored by hand or at Windows start";
+            //
+            // pnlAccent
+            //
+            pnlAccent.Dock = DockStyle.Top;
+            pnlAccent.Location = new Point(0, 64);
+            pnlAccent.Name = "pnlAccent";
+            pnlAccent.Size = new Size(1000, 3);
+            pnlAccent.TabIndex = 21;
+            pnlAccent.Paint += pnlAccent_Paint;
+            pnlAccent.Resize += pnlAccent_Resize;
             //
             // labelLayouts
             //
             labelLayouts.AutoSize = true;
             labelLayouts.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelLayouts.Location = new Point(12, 12);
+            labelLayouts.ForeColor = Color.FromArgb(20, 28, 48);
+            labelLayouts.Location = new Point(12, 79);
             labelLayouts.Name = "labelLayouts";
             labelLayouts.Size = new Size(66, 20);
             labelLayouts.TabIndex = 0;
@@ -69,7 +118,7 @@ namespace TrayLink
             listLayouts.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             listLayouts.FormattingEnabled = true;
             listLayouts.IntegralHeight = false;
-            listLayouts.Location = new Point(12, 36);
+            listLayouts.Location = new Point(12, 103);
             listLayouts.Name = "listLayouts";
             listLayouts.Size = new Size(220, 420);
             listLayouts.TabIndex = 1;
@@ -77,7 +126,7 @@ namespace TrayLink
             // buttonSaveNew
             //
             buttonSaveNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSaveNew.Location = new Point(12, 464);
+            buttonSaveNew.Location = new Point(12, 531);
             buttonSaveNew.Name = "buttonSaveNew";
             buttonSaveNew.Size = new Size(220, 32);
             buttonSaveNew.TabIndex = 2;
@@ -88,7 +137,7 @@ namespace TrayLink
             // buttonRename
             //
             buttonRename.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonRename.Location = new Point(12, 502);
+            buttonRename.Location = new Point(12, 569);
             buttonRename.Name = "buttonRename";
             buttonRename.Size = new Size(106, 32);
             buttonRename.TabIndex = 3;
@@ -98,7 +147,7 @@ namespace TrayLink
             // buttonDelete
             //
             buttonDelete.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonDelete.Location = new Point(126, 502);
+            buttonDelete.Location = new Point(126, 569);
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new Size(106, 32);
             buttonDelete.TabIndex = 4;
@@ -109,7 +158,7 @@ namespace TrayLink
             //
             labelInfo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             labelInfo.AutoEllipsis = true;
-            labelInfo.Location = new Point(248, 12);
+            labelInfo.Location = new Point(248, 79);
             labelInfo.Name = "labelInfo";
             labelInfo.Size = new Size(740, 20);
             labelInfo.TabIndex = 5;
@@ -122,14 +171,20 @@ namespace TrayLink
             grid.AllowUserToResizeRows = false;
             grid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            grid.BackgroundColor = SystemColors.Window;
+            grid.BackgroundColor = Color.White;
+            grid.BorderStyle = BorderStyle.FixedSingle;
+            grid.EnableHeadersVisualStyles = false;
+            grid.GridColor = Color.FromArgb(220, 226, 236);
+            headerStyle.BackColor = Color.FromArgb(20, 28, 48);
+            headerStyle.ForeColor = Color.FromArgb(238, 242, 250);
+            headerStyle.SelectionBackColor = Color.FromArgb(20, 28, 48);
             headerStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             headerStyle.WrapMode = DataGridViewTriState.False;
             grid.ColumnHeadersDefaultCellStyle = headerStyle;
             grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.Columns.AddRange(new DataGridViewColumn[] { colInclude, colApp, colTitle, colMonitor, colState, colStart, colStartWith, colDelay });
             grid.EditMode = DataGridViewEditMode.EditOnEnter;
-            grid.Location = new Point(248, 36);
+            grid.Location = new Point(248, 103);
             grid.MultiSelect = false;
             grid.Name = "grid";
             grid.RowHeadersVisible = false;
@@ -208,7 +263,7 @@ namespace TrayLink
             //
             chkAutoRestore.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             chkAutoRestore.AutoSize = true;
-            chkAutoRestore.Location = new Point(248, 469);
+            chkAutoRestore.Location = new Point(248, 536);
             chkAutoRestore.Name = "chkAutoRestore";
             chkAutoRestore.Size = new Size(300, 24);
             chkAutoRestore.TabIndex = 7;
@@ -221,7 +276,7 @@ namespace TrayLink
             labelHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelHint.AutoEllipsis = true;
             labelHint.ForeColor = SystemColors.GrayText;
-            labelHint.Location = new Point(248, 508);
+            labelHint.Location = new Point(248, 575);
             labelHint.Name = "labelHint";
             labelHint.Size = new Size(440, 20);
             labelHint.TabIndex = 8;
@@ -230,7 +285,7 @@ namespace TrayLink
             // buttonUpdate
             //
             buttonUpdate.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonUpdate.Location = new Point(694, 464);
+            buttonUpdate.Location = new Point(694, 531);
             buttonUpdate.Name = "buttonUpdate";
             buttonUpdate.Size = new Size(166, 32);
             buttonUpdate.TabIndex = 9;
@@ -241,19 +296,24 @@ namespace TrayLink
             // buttonRestore
             //
             buttonRestore.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonRestore.BackColor = Color.FromArgb(0, 52, 160);
+            buttonRestore.FlatAppearance.BorderSize = 0;
+            buttonRestore.FlatAppearance.MouseOverBackColor = Color.FromArgb(24, 118, 232);
+            buttonRestore.FlatStyle = FlatStyle.Flat;
+            buttonRestore.ForeColor = Color.White;
             buttonRestore.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            buttonRestore.Location = new Point(868, 464);
+            buttonRestore.Location = new Point(868, 531);
             buttonRestore.Name = "buttonRestore";
             buttonRestore.Size = new Size(120, 32);
             buttonRestore.TabIndex = 10;
             buttonRestore.Text = "Restore now";
-            buttonRestore.UseVisualStyleBackColor = true;
+            buttonRestore.UseVisualStyleBackColor = false;
             //
             // buttonClose
             //
             buttonClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonClose.DialogResult = DialogResult.Cancel;
-            buttonClose.Location = new Point(868, 502);
+            buttonClose.Location = new Point(868, 569);
             buttonClose.Name = "buttonClose";
             buttonClose.Size = new Size(120, 32);
             buttonClose.TabIndex = 11;
@@ -264,8 +324,9 @@ namespace TrayLink
             //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(236, 239, 244);
             CancelButton = buttonClose;
-            ClientSize = new Size(1000, 546);
+            ClientSize = new Size(1000, 613);
             Controls.Add(buttonClose);
             Controls.Add(buttonRestore);
             Controls.Add(buttonUpdate);
@@ -278,11 +339,15 @@ namespace TrayLink
             Controls.Add(buttonSaveNew);
             Controls.Add(listLayouts);
             Controls.Add(labelLayouts);
-            MinimumSize = new Size(860, 420);
+            Controls.Add(pnlAccent);
+            Controls.Add(pnlHeader);
+            MinimumSize = new Size(860, 487);
             Name = "LayoutManagerForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "TrayLink: Desktop layouts";
             ((System.ComponentModel.ISupportInitialize)grid).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -310,5 +375,9 @@ namespace TrayLink
         private Button buttonRestore;
         private Button buttonClose;
         private ToolTip toolTip;
+        private Panel pnlHeader;
+        private Label lblHeaderTitle;
+        private Label lblHeaderSubtitle;
+        private Panel pnlAccent;
     }
 }

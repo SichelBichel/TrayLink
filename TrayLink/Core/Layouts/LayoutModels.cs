@@ -20,7 +20,7 @@ namespace TrayLink.Core.Layouts
         public Box Bounds { get; set; } = new();
         public Box WorkArea { get; set; } = new();
 
-        public override string ToString() => $"{Index + 1} ({Bounds.Width} x {Bounds.Height})";
+        public override string ToString() => $"{Index + 1} ({Bounds.Width}x{Bounds.Height})";
     }
 
     /// <summary>A rectangle in physical screen pixels (JSON friendly).</summary>

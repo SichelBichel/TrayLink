@@ -4,21 +4,23 @@ Small tray tool by ReHoGa Interactive: left click on the tray icon opens a list 
 
 ## Usage
 
+The popup has two tabs: **Links** (the cards that start URLs, files and folders) and **Desktops** (saved desktop layouts). "Options" in the header holds: Add link, Open / Reload `actions.ini`, Close on focus loss, Explorer context menu, Start with Windows, Check for updates.
+
 - **Left click** on the tray icon: open or close the popup.
 - **Right click** on the tray icon: Open, Start with Windows, Check for updates, Exit.
-- **+** next to the search: add an entry.
+- **+** next to the search (Links tab): add a link.
 - **Edit** (pencil): name, type (URL / FILE / PATH), path and **position** (number, 1 = top).
 - **Reorder**: drag a card with the mouse (anywhere except the buttons) or use the arrow buttons. Reordering is disabled while the search filter is active.
 - **Drop files or folders** from Explorer into the list to add them.
-- **Shell Integration** button: adds or removes "Add to TrayLink" in the Explorer context menu (per user, no admin rights needed). On Windows 11 it is under "Show more options".
+- **Options > "Add to TrayLink" in the Explorer menu**: adds or removes the entry in the Explorer context menu (per user, no admin rights needed). On Windows 11 it is under "Show more options".
 - `%VAR%` environment variables are expanded in paths, for example `%USERPROFILE%\Downloads`.
 
 ## Desktop layouts
 
 Saves every open window with its monitor, position and state (normal, maximized, minimized) and brings it back later or once per Windows sign in.
 
-- **Save**: tray menu "Desktop layouts" > "Save current desktop...", or "Desktop Layouts..." in the popup. Several named layouts are possible.
-- **Restore**: tray menu "Desktop layouts" > "Restore ...", or "Restore now" in the manager. Windows that are open already are placed, missing apps are started and placed as soon as their window appears (and placed again 3 s later, for apps that move themselves).
+- **Save**: "Save current desktop..." in the Desktops tab, or tray menu "Desktop layouts". Several named layouts are possible.
+- **Restore**: "Restore" on the layout card, tray menu "Desktop layouts" > "Restore ...", or "Restore now" in the manager. Windows that are open already are placed, missing apps are started and placed as soon as their window appears (and placed again 3 s later, for apps that move themselves).
 - **At Windows start**: "Restore this layout when Windows starts" in the manager (needs "Start with Windows"). Runs once per sign in, 10 s after TrayLink started.
 
 How a window comes back:

@@ -17,7 +17,8 @@
             InitializeComponent();
 
             Result = source.Clone();
-            Text = isNew ? "Add entry" : "Edit entry";
+            Text = isNew ? "Add link" : "Edit link";
+            lblHeaderTitle.Text = Text;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true; // the tray popup is TopMost, the editor must not open behind it
 
@@ -39,6 +40,8 @@
             buttonOk.Click += ButtonOk_Click;
             buttonBrowse.Click += ButtonBrowse_Click;
         }
+
+        private void pnlAccent_Paint(object? sender, PaintEventArgs e) => Theme.PaintAccent(e.Graphics, pnlAccent.ClientRectangle);
 
         private void ButtonOk_Click(object? sender, EventArgs e)
         {

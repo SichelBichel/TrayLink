@@ -161,12 +161,14 @@ namespace TrayLink
             menu.Items.Add("Exit", null, (s, e) => Application.Exit());
 
             menu.Opening += (s, e) => _autostartItem.Checked = Autostart.IsEnabled;
+            Theme.ApplyRenderer(menu);
             return menu;
         }
 
         private static ToolStripMenuItem BuildLayoutMenu()
         {
             var root = new ToolStripMenuItem("Desktop layouts");
+            Theme.ApplyRenderer(root.DropDown);
             // Filled when it opens, so it always lists the saved layouts.
             root.DropDownItems.Add(new ToolStripMenuItem("(loading)") { Enabled = false });
             root.DropDownOpening += (s, e) =>
@@ -190,16 +192,16 @@ namespace TrayLink
                 }
 
                 root.DropDownItems.Add(new ToolStripSeparator());
-                root.DropDownItems.Add("Manage layouts...", null, (s2, e2) => ShowLayoutManager());
+                root.DropDownItems.Add("Manage layouts...", null, (s2, e2) => ShowLayoutManager(null));
             };
             return root;
         }
 
-        public static void ShowLayoutManager()
+        public static void ShowLayoutManager(string? select)
         {
             if (_layoutManager == null || _layoutManager.IsDisposed)
             {
-                _layoutManager = new LayoutManagerForm();
+                _layoutManager = new LayoutManagerForm(select);
                 _layoutManager.FormClosed += (s, e) => _layoutManager = null;
                 _layoutManager.Show();
             }
@@ -207,6 +209,8 @@ namespace TrayLink
             {
                 if (_layoutManager.WindowState == FormWindowState.Minimized)
                     _layoutManager.WindowState = FormWindowState.Normal;
+                if (select != null)
+                    _layoutManager.SelectLayout(select);
                 _layoutManager.BringToFront();
                 _layoutManager.Activate();
             }

@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using TrayLink.Core;
+using TrayLink.Core.Layouts;
 using TrayLink.Updater;
 
 namespace TrayLink
 {
-    public partial class TrayPopupForm : Form, ILinkItemHost
+    public partial class TrayPopupForm : Form, ILinkItemHost, ILayoutCardHost
     {
         private List<ActionConfig> _actions = new();
 
@@ -34,14 +35,20 @@ namespace TrayLink
             KeyPreview = true;
             _designHeight = Height;
 
-            label3.Text = "V " + VersionUtil.StripBuildMeta(VersionUtil.GetInstalledVersion());
-
-            chkAutoHide.Checked = AppSettings.Current.AutoHide;
-            chkAutoHide.CheckedChanged += (s, e) =>
+            lblVersion.Text = "V " + VersionUtil.StripBuildMeta(VersionUtil.GetInstalledVersion());
+            searchBar.PlaceholderText = "Search links";
+            Theme.ApplyRenderer(stripHeader, stripTabs, statusMain, ddOptions.DropDown);
+            try
             {
-                AppSettings.Current.AutoHide = chkAutoHide.Checked;
-                AppSettings.Save();
-            };
+                lblLogo.Image = Theme.Tint(Properties.Resources.ReHoGaBanner3_0_Transparent, Theme.Muted, 16);
+            }
+            catch
+            {
+                lblLogo.Visible = false; // logo is decoration only
+            }
+
+            LayoutUi.LayoutsChanged += OnLayoutsChanged;
+            SelectTab(AppSettings.Current.PopupTab == "Desktops");
 
             Deactivate += OnDeactivateAutoHide;
             FormClosing += OnFormClosing;
@@ -84,7 +91,6 @@ namespace TrayLink
                 _watcher = null; // auto reload is a convenience, the Reload button still works
             }
 
-            UpdateShellButton();
             ReloadFromDisk(force: true);
         }
 
@@ -114,7 +120,7 @@ namespace TrayLink
         {
             // Editor, message boxes and the updater are owned by the popup. They take the focus,
             // but the popup must stay open behind them.
-            if (!chkAutoHide.Checked || _modalDepth > 0 || _dragging)
+            if (!AppSettings.Current.AutoHide || _modalDepth > 0 || _dragging)
                 return;
 
             _autoHiddenAtUtc = DateTime.UtcNow;
@@ -289,6 +295,7 @@ namespace TrayLink
             actionPanel.ResumeLayout();
 
             actionPanel.AutoScrollPosition = new Point(0, scrollY);
+            UpdateStatus();
         }
 
         private void UpdateCardWidths()
@@ -482,7 +489,7 @@ namespace TrayLink
         private void inputLayouts(object? sender, EventArgs e)
         {
             Hide();
-            Program.ShowLayoutManager();
+            Program.ShowLayoutManager(null);
         }
 
         private void inputOpenConfig(object? sender, EventArgs e)
@@ -510,7 +517,7 @@ namespace TrayLink
 
         private void inputSearchQuery(object? sender, EventArgs e) => PopulateCards();
 
-        private async void inputUpdate(object? sender, LinkLabelLinkClickedEventArgs e) => await RunUpdateCheckAsync();
+        private async void inputUpdate(object? sender, EventArgs e) => await RunUpdateCheckAsync();
 
         public async Task RunUpdateCheckAsync()
         {
@@ -556,19 +563,199 @@ namespace TrayLink
             {
                 ShowError("Shell Integration", $"Shell integration failed:\n{ex.Message}");
             }
-
-            UpdateShellButton();
         }
 
-        private void UpdateShellButton() =>
-            button1.Text = ShellIntegration.IsRegistered
-                ? "Shell Integration: remove \"Add to TrayLink\""
-                : "Shell Integration: add \"Add to TrayLink\"";
+        // ------------------------------------------------------------------
+        // Header, tabs, options menu
+        // ------------------------------------------------------------------
+
+        private void pnlAccent_Paint(object? sender, PaintEventArgs e) => Theme.PaintAccent(e.Graphics, pnlAccent.ClientRectangle);
+
+        private void pnlAccent_Resize(object? sender, EventArgs e) => pnlAccent.Invalidate();
+
+        private void stripTabs_Resize(object? sender, EventArgs e)
+        {
+            // Both tabs share the width of the popup.
+            int half = Math.Max(60, stripTabs.ClientSize.Width / 2);
+            tabLinks.Width = half;
+            tabDesktops.Width = stripTabs.ClientSize.Width - half;
+            tabLinks.Height = tabDesktops.Height = stripTabs.ClientSize.Height;
+        }
+
+        private void tabLinks_Click(object? sender, EventArgs e) => SelectTab(desktops: false);
+
+        private void tabDesktops_Click(object? sender, EventArgs e) => SelectTab(desktops: true);
+
+        private bool DesktopsTabActive => tabDesktops.Checked;
+
+        private void SelectTab(bool desktops)
+        {
+            tabLinks.Checked = !desktops;
+            tabDesktops.Checked = desktops;
+            pnlLinks.Visible = !desktops;
+            pnlDesktops.Visible = desktops;
+
+            if (desktops)
+                PopulateLayoutCards();
+            UpdateStatus();
+
+            var name = desktops ? "Desktops" : "Links";
+            if (AppSettings.Current.PopupTab != name)
+            {
+                AppSettings.Current.PopupTab = name;
+                AppSettings.Save();
+            }
+        }
+
+        private void UpdateStatus()
+        {
+            if (DesktopsTabActive)
+            {
+                int count = layoutPanel.Controls.OfType<LayoutCard>().Count();
+                lblStatus.Text = LayoutUi.Busy ? "Working on a layout ..." : count == 1 ? "1 desktop layout" : $"{count} desktop layouts";
+            }
+            else
+            {
+                int shown = actionPanel.Controls.OfType<LinkItem>().Count();
+                lblStatus.Text = shown == _actions.Count
+                    ? (_actions.Count == 1 ? "1 link" : $"{_actions.Count} links")
+                    : $"{shown} of {_actions.Count} links";
+            }
+        }
+
+        private void ddOptions_DropDownOpening(object? sender, EventArgs e)
+        {
+            menuAutoHide.Checked = AppSettings.Current.AutoHide;
+            menuShellIntegration.Checked = ShellIntegration.IsRegistered;
+            menuStartWithWindows.Checked = Autostart.IsEnabled;
+        }
+
+        private void menuAutoHide_Click(object? sender, EventArgs e)
+        {
+            AppSettings.Current.AutoHide = !AppSettings.Current.AutoHide;
+            AppSettings.Save();
+        }
+
+        private void menuStartWithWindows_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                Autostart.SetEnabled(!Autostart.IsEnabled);
+            }
+            catch (Exception ex)
+            {
+                ShowError("Start with Windows", ex.Message);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Desktops tab
+        // ------------------------------------------------------------------
+
+        private bool _layoutsQueued;
+
+        private void OnLayoutsChanged()
+        {
+            if (IsHandleCreated && !IsDisposed)
+                BeginInvoke(new Action(RequestLayoutCards));
+        }
+
+        /// <summary>Like the link cards: rebuilt after the click that changed them has finished.</summary>
+        private void RequestLayoutCards()
+        {
+            if (_layoutsQueued)
+                return;
+            _layoutsQueued = true;
+            BeginInvoke(new Action(() =>
+            {
+                _layoutsQueued = false;
+                if (DesktopsTabActive)
+                    PopulateLayoutCards();
+            }));
+        }
+
+        private void PopulateLayoutCards()
+        {
+            List<DesktopLayout> layouts;
+            try
+            {
+                layouts = LayoutStore.LoadAll();
+            }
+            catch
+            {
+                layouts = new List<DesktopLayout>();
+            }
+
+            layoutPanel.SuspendLayout();
+            var old = layoutPanel.Controls.Cast<Control>().ToList();
+            layoutPanel.Controls.Clear();
+            foreach (var c in old)
+                c.Dispose();
+
+            int width = Math.Max(150, layoutPanel.Width - SystemInformation.VerticalScrollBarWidth - 2 * SystemInformation.BorderSize.Width - 8);
+            foreach (var layout in layouts)
+            {
+                bool auto = string.Equals(AppSettings.Current.AutoRestoreLayout, layout.Name, StringComparison.CurrentCultureIgnoreCase);
+                layoutPanel.Controls.Add(new LayoutCard(layout, auto, this) { Width = width });
+            }
+            layoutPanel.ResumeLayout();
+
+            lblNoLayouts.Visible = layouts.Count == 0;
+            UpdateStatus();
+        }
+
+        private async void buttonSaveLayout_Click(object? sender, EventArgs e)
+        {
+            _modalDepth++;
+            try
+            {
+                await LayoutUi.SaveCurrentAsync(this);
+            }
+            finally
+            {
+                _modalDepth--;
+            }
+            RequestLayoutCards();
+        }
+
+        public async void RestoreLayout(DesktopLayout layout)
+        {
+            // The popup is always on top: out of the way while the windows are placed.
+            Hide();
+            await LayoutUi.RestoreAsync(layout, atLogin: false);
+        }
+
+        public async void UpdateLayout(DesktopLayout layout)
+        {
+            var answer = RunModal(() => MessageBox.Show(this, $"Take the windows that are open now for '{layout.Name}'?\n\n" +
+                "Use, Start, Delay and own \"Start with\" values of known windows are kept.",
+                "Update desktop layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question));
+            if (answer != DialogResult.Yes)
+                return;
+
+            _modalDepth++;
+            try
+            {
+                await LayoutUi.UpdateAsync(layout, this);
+            }
+            finally
+            {
+                _modalDepth--;
+            }
+            RequestLayoutCards();
+        }
+
+        public void EditLayout(DesktopLayout layout)
+        {
+            Hide();
+            Program.ShowLayoutManager(layout.Name);
+        }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                LayoutUi.LayoutsChanged -= OnLayoutsChanged;
                 _watcher?.Dispose();
                 _reloadDebounce.Dispose();
                 components?.Dispose();

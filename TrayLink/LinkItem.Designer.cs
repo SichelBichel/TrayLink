@@ -47,7 +47,8 @@
             // 
             labelType.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             labelType.AutoSize = true;
-            labelType.ForeColor = SystemColors.HotTrack;
+            labelType.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            labelType.ForeColor = Color.FromArgb(14, 70, 170);
             labelType.ImageAlign = ContentAlignment.BottomLeft;
             labelType.Location = new Point(11, 71);
             labelType.Name = "labelType";
@@ -61,6 +62,7 @@
             labelName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             labelName.AutoEllipsis = true;
             labelName.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelName.ForeColor = Color.FromArgb(20, 28, 48);
             labelName.ImageAlign = ContentAlignment.TopLeft;
             labelName.Location = new Point(11, 22);
             labelName.Name = "labelName";
@@ -84,7 +86,10 @@
             // buttonExecute
             // 
             buttonExecute.Anchor = AnchorStyles.Right;
-            buttonExecute.BackColor = SystemColors.ControlLight;
+            buttonExecute.BackColor = Color.FromArgb(226, 235, 250);
+            buttonExecute.FlatAppearance.BorderSize = 0;
+            buttonExecute.FlatAppearance.MouseOverBackColor = Color.FromArgb(206, 222, 250);
+            buttonExecute.FlatStyle = FlatStyle.Flat;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;
             buttonExecute.Location = new Point(195, 17);
@@ -116,7 +121,11 @@
             buttonDelete.TabIndex = 4;
             buttonDelete.Cursor = Cursors.Hand;
             toolTip.SetToolTip(buttonDelete, "Delete");
-            buttonDelete.UseVisualStyleBackColor = true;
+            buttonDelete.BackColor = Color.White;
+            buttonDelete.FlatAppearance.BorderSize = 0;
+            buttonDelete.FlatAppearance.MouseOverBackColor = Color.FromArgb(226, 235, 250);
+            buttonDelete.FlatStyle = FlatStyle.Flat;
+            buttonDelete.UseVisualStyleBackColor = false;
             buttonDelete.Click += inputDeleteEntry;
             // 
             // buttonEdit
@@ -130,7 +139,11 @@
             buttonEdit.TabIndex = 5;
             buttonEdit.Cursor = Cursors.Hand;
             toolTip.SetToolTip(buttonEdit, "Edit");
-            buttonEdit.UseVisualStyleBackColor = true;
+            buttonEdit.BackColor = Color.White;
+            buttonEdit.FlatAppearance.BorderSize = 0;
+            buttonEdit.FlatAppearance.MouseOverBackColor = Color.FromArgb(226, 235, 250);
+            buttonEdit.FlatStyle = FlatStyle.Flat;
+            buttonEdit.UseVisualStyleBackColor = false;
             buttonEdit.Click += inputEditEntry;
             // 
             // imageListIcons
@@ -176,7 +189,11 @@
             buttonUp.TabIndex = 6;
             buttonUp.Cursor = Cursors.Hand;
             toolTip.SetToolTip(buttonUp, "Move up");
-            buttonUp.UseVisualStyleBackColor = true;
+            buttonUp.BackColor = Color.White;
+            buttonUp.FlatAppearance.BorderSize = 0;
+            buttonUp.FlatAppearance.MouseOverBackColor = Color.FromArgb(226, 235, 250);
+            buttonUp.FlatStyle = FlatStyle.Flat;
+            buttonUp.UseVisualStyleBackColor = false;
             buttonUp.Click += ClickMoveUp;
             // 
             // buttonDown
@@ -190,15 +207,18 @@
             buttonDown.TabIndex = 7;
             buttonDown.Cursor = Cursors.Hand;
             toolTip.SetToolTip(buttonDown, "Move down");
-            buttonDown.UseVisualStyleBackColor = true;
+            buttonDown.BackColor = Color.White;
+            buttonDown.FlatAppearance.BorderSize = 0;
+            buttonDown.FlatAppearance.MouseOverBackColor = Color.FromArgb(226, 235, 250);
+            buttonDown.FlatStyle = FlatStyle.Flat;
+            buttonDown.UseVisualStyleBackColor = false;
             buttonDown.Click += clickMoveDown;
             // 
             // LinkItem
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ControlLight;
-            BorderStyle = BorderStyle.FixedSingle;
+            BackColor = Color.White;
             Controls.Add(buttonDown);
             Controls.Add(buttonUp);
             Controls.Add(buttonEdit);

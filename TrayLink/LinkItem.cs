@@ -89,7 +89,8 @@
         private void BeginCardDrag()
         {
             DragDropEffects result = DragDropEffects.None;
-            BackColor = SystemColors.GradientInactiveCaption;
+            BackColor = Theme.DragHighlight;
+            Invalidate();
             try
             {
                 var data = new DataObject();
@@ -103,6 +104,18 @@
             }
 
             _host.OnCardDragFinished(this, result == DragDropEffects.Move);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            Theme.PaintCardFrame(e.Graphics, ClientRectangle, highlight: BackColor == Theme.DragHighlight);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            Invalidate();
         }
 
         private void inputExecute(object sender, EventArgs e) => _host.ExecuteAction(Config);

@@ -14,9 +14,14 @@ namespace TrayLink
 
         private DesktopLayout? Current => listLayouts.SelectedItem as DesktopLayout;
 
-        public LayoutManagerForm()
+        private readonly string? _selectOnLoad;
+
+        public LayoutManagerForm(string? select = null)
         {
             InitializeComponent();
+            _selectOnLoad = select;
+            grid.DefaultCellStyle.SelectionBackColor = Theme.Selected;
+            grid.DefaultCellStyle.SelectionForeColor = Color.White;
             Icon = Program.AppIcon;
             listLayouts.DisplayMember = nameof(DesktopLayout.Name);
 
@@ -40,8 +45,14 @@ namespace TrayLink
 
             LayoutUi.LayoutsChanged += OnLayoutsChanged;
             FormClosed += (s, e) => LayoutUi.LayoutsChanged -= OnLayoutsChanged;
-            Load += (s, e) => ReloadList(null);
+            Load += (s, e) => ReloadList(_selectOnLoad);
         }
+
+        public void SelectLayout(string name) => ReloadList(name);
+
+        private void pnlAccent_Paint(object? sender, PaintEventArgs e) => Theme.PaintAccent(e.Graphics, pnlAccent.ClientRectangle);
+
+        private void pnlAccent_Resize(object? sender, EventArgs e) => pnlAccent.Invalidate();
 
         private void OnLayoutsChanged()
         {
