@@ -31,12 +31,12 @@ How a window comes back:
 | Program started with a file or arguments | the same arguments (shown in "Start with", editable, for example a DAW project) |
 | Store app, Windows Terminal | its app id |
 | Discord, Slack and other Squirrel apps | their `Update.exe` (the app folder changes with every update) |
-| Browser | started once, its own session restore brings the tabs, TrayLink places the windows |
+| Browser (Chrome, Edge, Brave, Vivaldi) | started once with `--restore-last-session`: all windows and tabs of the last browser session come back, TrayLink places each window (title first, then the window that is nearest to its saved place) |
 | Anything else that can not be started (system windows, no access) | position only, when it is open |
 
 Per window in the manager: Use (on/off), Start (Auto / Position only), Start with, Delay in seconds. "Update from desktop" takes the open windows again and keeps these settings.
 
-Not possible: windows of programs that run as administrator can not be moved by TrayLink (Windows blocks it). Browser tabs come from the browser itself ("Continue where you left off"). With Explorer tabs (Windows 11) only the first tab is opened again.
+Not possible: windows of programs that run as administrator can not be moved by TrayLink (Windows blocks it). Browser tabs are those of the last browser session (when the browser was closed), not those of the snapshot. Firefox has no such switch: there "Open previous windows and tabs" must be on. With Explorer tabs (Windows 11) only the first tab is opened again.
 
 ## Files
 

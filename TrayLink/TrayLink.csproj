@@ -10,10 +10,10 @@
     <PackageIcon>TrayLink.png</PackageIcon>
     <Product>TrayLink</Product>
     <Company>ReHoGa Interactive</Company>
-    <PackageReleaseNotes>1.7.1</PackageReleaseNotes>
-    <AssemblyVersion>1.7.1</AssemblyVersion>
-    <FileVersion>1.7.1</FileVersion>
-    <InformationalVersion>1.7.1</InformationalVersion>
+    <PackageReleaseNotes>1.7.2</PackageReleaseNotes>
+    <AssemblyVersion>1.7.2</AssemblyVersion>
+    <FileVersion>1.7.2</FileVersion>
+    <InformationalVersion>1.7.2</InformationalVersion>
     <BuildUpdater>true</BuildUpdater>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>

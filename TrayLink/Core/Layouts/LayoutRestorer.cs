@@ -71,7 +71,7 @@ namespace TrayLink.Core.Layouts
                 var claimed = new HashSet<IntPtr>(slots.Where(s => s.Matched).Select(s => s.Window));
                 foreach (var s in slots.Where(s => !s.Matched && !s.Failed))
                 {
-                    var match = BestMatch(s.Entry, live, claimed);
+                    var match = BestMatch(s.Entry, live, claimed, mapper.MapBounds(s.Entry));
                     if (match == null)
                         continue;
 
@@ -142,7 +142,9 @@ namespace TrayLink.Core.Layouts
         // Matching
         // ------------------------------------------------------------------
 
-        private static LiveWindow? BestMatch(LayoutWindow entry, List<LiveWindow> live, HashSet<IntPtr> claimed)
+        /// <param name="target">Where the window belongs: breaks ties between windows of the same app
+        /// (two Chrome windows whose titles changed since the snapshot).</param>
+        private static LiveWindow? BestMatch(LayoutWindow entry, List<LiveWindow> live, HashSet<IntPtr> claimed, Rectangle target)
         {
             LiveWindow? best = null;
             int bestScore = 0;
@@ -152,6 +154,8 @@ namespace TrayLink.Core.Layouts
                 if (claimed.Contains(w.Handle))
                     continue;
                 int score = Score(entry, w);
+                if (score > 0)
+                    score += ProximityBonus(target, w.Bounds);
                 if (score > bestScore)
                 {
                     best = w;
@@ -208,6 +212,44 @@ namespace TrayLink.Core.Layouts
             }
 
             return score;
+        }
+
+        /// <summary>
+        /// Up to 40 points for a window that is already where the entry belongs. Browsers restore their windows at
+        /// their old place, so with two windows of the same app the nearer one wins. A title match (100) still beats it.
+        /// </summary>
+        private static int ProximityBonus(Rectangle target, Rectangle current)
+        {
+            long area = (long)target.Width * target.Height;
+            if (area <= 0)
+                return 0;
+            var overlap = Rectangle.Intersect(target, current);
+            if (overlap.IsEmpty)
+                return 0;
+            double ratio = Math.Min(1.0, (double)overlap.Width * overlap.Height / area);
+            return (int)Math.Round(40 * ratio);
+        }
+
+        private static readonly HashSet<string> ChromiumBrowsers = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "chrome.exe", "msedge.exe", "brave.exe", "vivaldi.exe", "chromium.exe"
+        };
+
+        /// <summary>
+        /// Chrome, Edge, Brave, Vivaldi: started with --restore-last-session, so all windows and their tabs come back
+        /// even when the browser setting "On startup" is "Open the New Tab page". Not for web apps (--app-id) and not
+        /// when the arguments open their own URLs.
+        /// </summary>
+        internal static string BrowserArguments(string exePath, string args)
+        {
+            var file = exePath[(exePath.LastIndexOfAny(new[] { '\\', '/' }) + 1)..];
+            if (!ChromiumBrowsers.Contains(file))
+                return args;
+            if (args.Contains("--restore-last-session", StringComparison.OrdinalIgnoreCase) ||
+                args.Contains("--app", StringComparison.OrdinalIgnoreCase) ||
+                args.Contains("://", StringComparison.Ordinal))
+                return args;
+            return (args + " --restore-last-session").Trim();
         }
 
         private static bool SameApp(LayoutWindow e, LiveWindow w)
@@ -268,7 +310,7 @@ namespace TrayLink.Core.Layouts
                             error = "program not found";
                             return false;
                         }
-                        Process.Start(new ProcessStartInfo(e.ExePath, e.StartWith)
+                        Process.Start(new ProcessStartInfo(e.ExePath, BrowserArguments(e.ExePath, e.StartWith))
                         {
                             UseShellExecute = true,
                             WorkingDirectory = Path.GetDirectoryName(e.ExePath) ?? ""

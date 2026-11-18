@@ -137,6 +137,8 @@ namespace TrayLink
 
         private static string StartWithHint(LayoutWindow w) => w.Launch switch
         {
+            LaunchKind.Exe when TrayLink.Core.Layouts.LayoutRestorer.BrowserArguments(w.ExePath, w.StartWith) != w.StartWith =>
+                "Arguments for " + Path.GetFileName(w.ExePath) + ". Started with --restore-last-session: all windows and tabs of the last browser session come back.",
             LaunchKind.Exe => "Arguments for " + Path.GetFileName(w.ExePath) + " (for example the project or file to open)",
             LaunchKind.Explorer => "Folder of the Explorer window" + (w.ExtraPaths.Count > 0 ? "\nOther tabs: " + string.Join(", ", w.ExtraPaths) : ""),
             LaunchKind.PackagedApp => "Store app, started by its app id",

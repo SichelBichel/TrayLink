@@ -114,7 +114,7 @@
             lblVersion.Name = "lblVersion";
             lblVersion.Size = new Size(46, 19);
             lblVersion.TabIndex = 2;
-            lblVersion.Text = "V 1.7.1";
+            lblVersion.Text = "V 1.7.2";
             //
             // stripHeader
             //
