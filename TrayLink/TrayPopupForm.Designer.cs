@@ -32,6 +32,7 @@
             button1 = new Button();
             chkAutoHide = new CheckBox();
             buttonAdd = new Button();
+            buttonLayouts = new Button();
             toolTip = new ToolTip(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -46,9 +47,9 @@
             actionPanel.WrapContents = false;
             actionPanel.BackColor = SystemColors.ButtonShadow;
             actionPanel.BorderStyle = BorderStyle.FixedSingle;
-            actionPanel.Location = new Point(11, 263);
+            actionPanel.Location = new Point(11, 288);
             actionPanel.Name = "actionPanel";
-            actionPanel.Size = new Size(298, 529);
+            actionPanel.Size = new Size(298, 504);
             actionPanel.TabIndex = 0;
             // 
             // searchBar
@@ -186,12 +187,27 @@
             buttonAdd.Click += inputAddEntry;
             toolTip.SetToolTip(buttonAdd, "Add entry (or drop files/folders into the list)");
             // 
+            // buttonLayouts
+            // 
+            buttonLayouts.BackColor = SystemColors.ControlDark;
+            buttonLayouts.Font = new Font("Segoe UI", 8F);
+            buttonLayouts.ForeColor = SystemColors.ActiveCaptionText;
+            buttonLayouts.Location = new Point(11, 248);
+            buttonLayouts.Name = "buttonLayouts";
+            buttonLayouts.Size = new Size(298, 33);
+            buttonLayouts.TabIndex = 13;
+            buttonLayouts.Text = "Desktop Layouts...";
+            buttonLayouts.UseVisualStyleBackColor = false;
+            buttonLayouts.Click += inputLayouts;
+            toolTip.SetToolTip(buttonLayouts, "Save the open windows and their positions, restore them later or at Windows start");
+            // 
             // TrayPopupForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(322, 805);
+            Controls.Add(buttonLayouts);
             Controls.Add(buttonAdd);
             Controls.Add(chkAutoHide);
             Controls.Add(button1);
@@ -229,6 +245,7 @@
         private Button button1;
         private CheckBox chkAutoHide;
         private Button buttonAdd;
+        private Button buttonLayouts;
         private ToolTip toolTip;
     }
 }

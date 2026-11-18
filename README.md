@@ -13,6 +13,29 @@ Small tray tool by ReHoGa Interactive: left click on the tray icon opens a list 
 - **Shell Integration** button: adds or removes "Add to TrayLink" in the Explorer context menu (per user, no admin rights needed). On Windows 11 it is under "Show more options".
 - `%VAR%` environment variables are expanded in paths, for example `%USERPROFILE%\Downloads`.
 
+## Desktop layouts
+
+Saves every open window with its monitor, position and state (normal, maximized, minimized) and brings it back later or once per Windows sign in.
+
+- **Save**: tray menu "Desktop layouts" > "Save current desktop...", or "Desktop Layouts..." in the popup. Several named layouts are possible.
+- **Restore**: tray menu "Desktop layouts" > "Restore ...", or "Restore now" in the manager. Windows that are open already are placed, missing apps are started and placed as soon as their window appears (and placed again 3 s later, for apps that move themselves).
+- **At Windows start**: "Restore this layout when Windows starts" in the manager (needs "Start with Windows"). Runs once per sign in, 10 s after TrayLink started.
+
+How a window comes back:
+
+| Window | Started with |
+|---|---|
+| File Explorer | its folder |
+| Program started with a file or arguments | the same arguments (shown in "Start with", editable, for example a DAW project) |
+| Store app, Windows Terminal | its app id |
+| Discord, Slack and other Squirrel apps | their `Update.exe` (the app folder changes with every update) |
+| Browser | started once, its own session restore brings the tabs, TrayLink places the windows |
+| Anything else that can not be started (system windows, no access) | position only, when it is open |
+
+Per window in the manager: Use (on/off), Start (Auto / Position only), Start with, Delay in seconds. "Update from desktop" takes the open windows again and keeps these settings.
+
+Not possible: windows of programs that run as administrator can not be moved by TrayLink (Windows blocks it). Browser tabs come from the browser itself ("Continue where you left off"). With Explorer tabs (Windows 11) only the first tab is opened again.
+
 ## Files
 
 Everything is stored per user in `%APPDATA%\TrayLink`:
@@ -20,7 +43,8 @@ Everything is stored per user in `%APPDATA%\TrayLink`:
 | File | Content |
 |---|---|
 | `actions.ini` | the entries, the section order is the card order |
-| `settings.json` | "Close on focus loss" |
+| `settings.json` | "Close on focus loss", layout restored at Windows start |
+| `layouts\*.json` | the desktop layouts |
 
 An `actions.ini` from older versions (next to the exe) is copied there on first start. Changes to `actions.ini` from outside (editor, context menu) are picked up automatically.
 

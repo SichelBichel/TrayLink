@@ -479,6 +479,12 @@ namespace TrayLink
 
         private void inputReloadConfig(object? sender, EventArgs e) => ReloadFromDisk(force: true);
 
+        private void inputLayouts(object? sender, EventArgs e)
+        {
+            Hide();
+            Program.ShowLayoutManager();
+        }
+
         private void inputOpenConfig(object? sender, EventArgs e)
         {
             try

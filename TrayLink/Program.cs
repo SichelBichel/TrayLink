@@ -1,5 +1,6 @@
 using System.Reflection;
 using TrayLink.Core;
+using TrayLink.Core.Layouts;
 
 namespace TrayLink
 {
@@ -13,6 +14,7 @@ namespace TrayLink
         private static NotifyIcon? _trayIcon;
         private static TrayPopupForm? _popup;
         private static ToolStripMenuItem? _autostartItem;
+        private static LayoutManagerForm? _layoutManager;
 
         [STAThread]
         static int Main(string[] args)
@@ -79,6 +81,7 @@ namespace TrayLink
             };
 
             StartShowEventListener();
+            LayoutUi.ScheduleAutoRestore();
 
             Application.Run();
             return 0;
@@ -129,6 +132,7 @@ namespace TrayLink
             var menu = new ContextMenuStrip();
 
             menu.Items.Add("Open TrayLink", null, (s, e) => ShowPopup());
+            menu.Items.Add(BuildLayoutMenu());
             menu.Items.Add(new ToolStripSeparator());
 
             _autostartItem = new ToolStripMenuItem("Start with Windows") { CheckOnClick = true };
@@ -158,6 +162,64 @@ namespace TrayLink
 
             menu.Opening += (s, e) => _autostartItem.Checked = Autostart.IsEnabled;
             return menu;
+        }
+
+        private static ToolStripMenuItem BuildLayoutMenu()
+        {
+            var root = new ToolStripMenuItem("Desktop layouts");
+            // Filled when it opens, so it always lists the saved layouts.
+            root.DropDownItems.Add(new ToolStripMenuItem("(loading)") { Enabled = false });
+            root.DropDownOpening += (s, e) =>
+            {
+                root.DropDownItems.Clear();
+                root.DropDownItems.Add("Save current desktop...", null, async (s2, e2) => await LayoutUi.SaveCurrentAsync(null));
+
+                var layouts = LayoutStore.LoadAll();
+                if (layouts.Count > 0)
+                {
+                    root.DropDownItems.Add(new ToolStripSeparator());
+                    foreach (var layout in layouts)
+                    {
+                        var item = new ToolStripMenuItem("Restore \"" + layout.Name + "\"") { Enabled = !LayoutUi.Busy };
+                        if (string.Equals(AppSettings.Current.AutoRestoreLayout, layout.Name, StringComparison.CurrentCultureIgnoreCase))
+                            item.Text += "  (at Windows start)";
+                        var captured = layout;
+                        item.Click += async (s2, e2) => await LayoutUi.RestoreAsync(captured, atLogin: false);
+                        root.DropDownItems.Add(item);
+                    }
+                }
+
+                root.DropDownItems.Add(new ToolStripSeparator());
+                root.DropDownItems.Add("Manage layouts...", null, (s2, e2) => ShowLayoutManager());
+            };
+            return root;
+        }
+
+        public static void ShowLayoutManager()
+        {
+            if (_layoutManager == null || _layoutManager.IsDisposed)
+            {
+                _layoutManager = new LayoutManagerForm();
+                _layoutManager.FormClosed += (s, e) => _layoutManager = null;
+                _layoutManager.Show();
+            }
+            else
+            {
+                if (_layoutManager.WindowState == FormWindowState.Minimized)
+                    _layoutManager.WindowState = FormWindowState.Normal;
+                _layoutManager.BringToFront();
+                _layoutManager.Activate();
+            }
+        }
+
+        /// <summary>Balloon of the tray icon (layout saved / restored).</summary>
+        public static void ShowInfo(string title, string text, ToolTipIcon icon = ToolTipIcon.Info)
+        {
+            if (_trayIcon == null)
+                return;
+            if (text.Length > 250)
+                text = text[..247] + "...";
+            _trayIcon.ShowBalloonTip(8000, title, text, icon);
         }
 
         private static void StartShowEventListener()
