@@ -86,9 +86,10 @@
             // buttonExecute
             // 
             buttonExecute.Anchor = AnchorStyles.Right;
-            buttonExecute.BackColor = Color.FromArgb(226, 235, 250);
+            buttonExecute.BackColor = Color.White;
+            buttonExecute.Tag = "keep";
             buttonExecute.FlatAppearance.BorderSize = 0;
-            buttonExecute.FlatAppearance.MouseOverBackColor = Color.FromArgb(206, 222, 250);
+            buttonExecute.FlatAppearance.MouseOverBackColor = Color.FromArgb(226, 235, 250);
             buttonExecute.FlatStyle = FlatStyle.Flat;
             buttonExecute.ImageKey = "rocket.png";
             buttonExecute.ImageList = imageList1;

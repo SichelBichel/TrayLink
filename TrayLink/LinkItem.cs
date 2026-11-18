@@ -29,6 +29,7 @@
         {
             InitializeComponent();
             Theme.ApplyContent(this);
+            Theme.KeepLaunchWhite(buttonExecute);
             Config = config;
             _host = host;
             _normalBackColor = BackColor;

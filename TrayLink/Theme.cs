@@ -43,6 +43,10 @@ namespace TrayLink
         public static readonly Color AccentTextLight = Color.FromArgb(14, 70, 170);
         public static readonly Color GridLineLight = Color.FromArgb(220, 226, 236);
 
+        // Launch button of a link card: white in light AND dark mode (owner decision, 1.7.1)
+        public static readonly Color LaunchBack = Color.White;
+        public static readonly Color LaunchHover = Color.FromArgb(226, 235, 250);
+
         // Page content, dark values
         private static readonly Color PageDark = Color.FromArgb(24, 28, 38);
         private static readonly Color CardDark = Color.FromArgb(34, 40, 54);
@@ -116,6 +120,8 @@ namespace TrayLink
         {
             if (c is ToolStrip)
                 return; // the chrome renderer draws these
+            if (c.Tag is "keep")
+                return; // fixed colours on purpose (launch button of a link card)
 
             switch (c)
             {
@@ -172,6 +178,14 @@ namespace TrayLink
             if (argb == ContentTextLight.ToArgb()) return ContentTextDark;
             if (argb == AccentTextLight.ToArgb()) return AccentTextDark;
             return c;
+        }
+
+        /// <summary>The launch button keeps its white tile in every mode (call after <see cref="ApplyContent"/>).</summary>
+        public static void KeepLaunchWhite(ButtonBase button)
+        {
+            button.BackColor = LaunchBack;
+            button.FlatAppearance.MouseOverBackColor = LaunchHover;
+            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(206, 222, 250);
         }
 
         /// <summary>Thin frame around a card (white control on the light page).</summary>
